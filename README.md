@@ -1,74 +1,47 @@
-# tru.ID Node Server Example
+# sim-card-auth-android
+How to Add SIM Card Based Authentication to your Android App [with tru.ID]
 
-The tru.ID Node Server provides basic example code to be used with client application.
+[![License][license-image]][license-url]
+
 
 ## Before you being
 
 You will need:
 
-- Node.JS installed
-- a [tru.ID](https://tru.id) account
-- a local tunnel solution if you wish to recieve Phone Check callbacks
+- Android capable IDE e.g. [Android Studio](https://developer.android.com/studio)
+- A [tru.ID Account](https://tru.id)
+- The Node.js installed and the [server example](https://github.com/tru-ID/server-example-node) running
+    - Follow the instructions within the tru.ID example node.js server README
+    - A local tunnel solution such as [ngrok](https://ngrok.com/)
+- An Android phone with a SIM card and mobile data connection
 
 ## Getting Started
 
-Clone or unzip the tru.ID Node Server into a directory.
+- Get the server example up and running
+- Run your local tunnel solution and tunnelling the requests to the running server
+- Clone or unzip the PhoneCheckExample into a directory.
+- Open the project with your Android Capable IDE
+- Once you have your server up and running make a copy of the `app/tru.properties.example` file `cp app/tru.properties.example app/tru.properties` and update the configuration value to be the URL of your example server.
+    - `tru.properties`:
+        ```
+        EXAMPLE_SERVER_BASE_URL="https://example.com"
+        ```
+- Connect your phone to your computer so it's used for running the PhoneCheckExample application
+- Run the application from your IDE
+- Enter the phone number for the mobile device in the UI in the format +{country_code}{number} e.g. `+447900123456`
+- Press the done keyboard key or touch the "Verify my phone number" button
+- You will see the result of the Phone Check
+- Get in touch: please email feedback@tru.id with any questions
 
-### Create a tru.ID Project
+## References
 
-- Install the [tru.ID CLI](https://tru.id/docs/reference/cli)
-- Setup the CLI with the `client_id` and `client_secret` from the [tru.ID Console](https://tru.id/console)
-- Create a project with the CLI pointing to the tru.ID Node Server directory `$ tru projects:create --project-dir PATH_TO_SERVER_DIR`. This will create a `tru.json` file in the directory.
+- [tru.ID example node.js server](https://github.com/tru-ID/server-example-node)
 
-### Install dependencies:
+## Meta
 
-```
-npm install
-```
+Distributed under the MIT license. See [LICENSE][license-url] for more information.
 
-or
+[https://github.com/tru-ID](https://github.com/tru-ID)
 
-```
-yarn install
-```
-
-## Configuration
-
-If required, you can make configuration changes with the following environment variables:
-
-- `PORT` : change the port that the server listens on
-- `DEBUG` : determines whether debug information is logged via `console.log`
-- `CONFIG_PATH` : the path to the `tru.json` configuration file for the tru.ID project
-- `API_BASE_URL` : the tru.ID base URL. Defaults to `https://eu.api.tru.id`
-
-The server will attempt to load environment variables from a `.env` file in the root directory of the server.
-
-### Phone Check callbacks
-
-If you wish to receive Phone Check HTTP callbacks when the Phone Check enters and end state, you must:
-
-1. Run a local tunnel solution to expose your local running server to the Internet
-2. Configure your Project to have a `phonecheck_callback_url
-
-From the project directory run the following command replacing `{local_tunnel_url}` with the URL exposing your localhost server to the Internet:
-
-```
-$ tru projects:update --phonecheck-callback {local_tunnel_url}/phone-check/callback
-```
-
-### Run the server
-
-```
-npm start
-```
-
-or 
-
-```
-yarn start
-```
-
-### Explore
-
-- View the code in [blob/main/src/index.js](blob/main/src/index.js)
-- The server exposes a basic homepage with some test pages that allow you to try out some functionality# sim-card-auth-android
+[license-image]: https://img.shields.io/badge/License-MIT-blue.svg
+[license-url]: LICENSE.md
