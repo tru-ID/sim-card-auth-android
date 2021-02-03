@@ -18,6 +18,9 @@ allprojects {
     repositories {
         google()
         jcenter()
+        maven {
+            url "https://gitlab.com/api/v4/projects/22035475/packages/maven"
+        }
     }
 }
 
