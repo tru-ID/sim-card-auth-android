@@ -2,15 +2,20 @@
 
 ## Introduction
 
-Are you looking for a seamless phone number verification for your Android application?
+Have you ever wanted to authenticate the users of your Android app by using the phone number?
+There are many traditional solutions, but these mechanisms still rely on SMS to send a one-time code to the end user.
 
-* In the past, you might have used any of the numerous traditional solutions, but all of them still rely on SMS to send a one-time code to the end user.
-* OR: In the past, you might have used any of the numerous libraries such as Twitter Digits for example, but all of these solutions still rely on SMS to send a one-time code to the end user.
-
-Look no further, with the tru.ID PhoneCheck API the ownership of a mobile phone number is confirmed by verifying the possession of an active SIM card with the same number. That's right, no more one-time code exchange, no more logic around PIN mis-type or retry due to delivery failure.
+Here at [tru.ID] we have come up with an innovative solution, called *PhoneCheck*, that confirms the ownership of a mobile phone number by verifying the possession of an active SIM card with the same number.
+That's right, no more one-time code exchange, no more logic around PIN mis-type or retry due to delivery failure.
 This means with Instant PhoneCheck the user never leaves your app, and the entire verification happens seamlessly. Fewer dependencies, better security and a better experience.
 
-This tutorial will walk you through the steps of setting up a basic Android application that uses the PhoneCheck API.
+This is what you're going to build:
+A basic Android application that implements a phone number authentication/sign-in flow using the PhoneCheck API and SDK.
+**Estimated completion time: 20 mins**
+
+The completed Android sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. The repo includes a README with documentation for running and exploring the code.
+
+Let's run this step by step ...
 
 ## Before you begin
 
@@ -20,137 +25,16 @@ This tutorial will walk you through the steps of setting up a basic Android appl
 * An updated version of [Android Studio](https://developer.android.com/studio "Download Android Studio")
 * If you haven't already, register for a [truID account](https://tru.id/)
 * Setup a local server using the Node.js [example server](https://tru.id/docs/phone-check/getting-started-android#2-setup-the-nodejs-example-server)
-* One more thing to remember is that the PhoneCheck requires a physical device and won’t work on an emulator.
+* One more thing to remember is that the PhoneCheck requires a physical device with an active SIM card, and won’t work on an emulator
 
 </details>
 
 
-**Estimated completion time: 25 mins**
+## Step 1: Let's start by creating a new project
 
----
-**NOTE**
-Want to skip this tutorial? You can jump to the completed Android sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. The repo includes a README with documentation for running and exploring the code.
----
+First, you have to create a new Android application using Android Studio. The app name is PhoneNumberAuthenticationDemo. The package name is id.tru.com.phonenumberauthenticationdemo.
+Click through the wizard, ensuring that Empty Activity is selected. Leave the Activity Name set to MainActivity, and leave the Layout Name set to activity_main.
 
-## Step 1: Creating a new project
-
-1. Open Android Studio and select New Project from the File menu.
-
-2. Set the minimum SDK for the app to be API 21 (Android 7 Nougat).
-
-3. Click through the wizard, ensuring that Empty Activity is selected. Leave the Activity Name set to MainActivity, and leave the Layout Name set to activity_main.
-
-## Step 2: Adding the `tru-sdk-android` SDK
-The purpose of using the SDK is to make sure execution of a phone check verification request is done against mobile data connection.
-
-1. Edit the build.gradle for your project (at your project's root) and add the following code snippet to the allprojects/repositories section:
-The app uses Maven to load the tru.ID Android SDK:
-
-```groovy
-    maven {
-        url "https://gitlab.com/api/v4/projects/22035475/packages/maven"
-    }
- ```
-
-At this point the build.gradle file should look like this:
-```groovy
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-buildscript {
-    ext.kotlin_version = "1.3.72"
-    repositories {
-        google()
-        jcenter()
-    }
-    dependencies {
-        classpath "com.android.tools.build:gradle:4.0.0"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        jcenter()
-        maven {
-            url "https://gitlab.com/api/v4/projects/22035475/packages/maven"
-        }
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-```
-
-2. Modify build.gradle for your module (the app/build.gradle file) and add the following code snippet to the dependencies section:
-
-```groovy
-implementation 'id.tru.sdk:tru-sdk-android:0.0.1'
-```
-
-At this point the build.gradle file for your module should look like this:
-```groovy
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-
-android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
-
-    defaultConfig {
-        applicationId "id.tru.authentication"
-        minSdkVersion 21
-        targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = '1.8'
-    }
-}
-
-dependencies {
-    implementation fileTree(dir: "libs", include: ["*.jar"])
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.core:core-ktx:1.3.2'
-    implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'com.google.android.material:material:1.2.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
-    implementation 'androidx.navigation:navigation-fragment-ktx:2.3.1'
-    implementation 'androidx.navigation:navigation-ui-ktx:2.3.1'
-    implementation 'id.tru.sdk:tru-sdk-android:0.0.1'
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
-
-}
-```
-The `tru-sdk-android` is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore we have set minSdkVersion = 21.
-
-3. Sync your project
-
-4. Add the tru.ID Android classes to the application — in Android Studio, open the MainActivity.java file. And add the following import statements:
-
-```kotlin
-import id.tru.sdk.TruSDK
-```
 
 ## Step 2: Phone number authentication UI
 To allow the end user to input his phone number we use material.EditText object.
@@ -196,6 +80,7 @@ object RetrofitBuilder {
     }
 }
 ```
+We have added the HttpLoggingInterceptor just so we can check what is going on every step of the way.
 
 Create an implementation of the API endpoints defined by the Service interface in a new file ApiService.kt
 This interface is empty at the moment
@@ -250,7 +135,26 @@ Now we are ready to create the PhoneCheck using the provided phone number:
 ```
 
 ### 3.2 Navigate to the PhoneCheck URL
-Obtain a TruSDK instance that will be used to perform the network request with PhoneCheck URL over mobile data connection.
+At this point you're going to add `tru-sdk-android` SDK to your project.
+The purpose of using the SDK is to make sure execution of a phone check verification request is done against mobile data connection.
+
+Edit the build.gradle for your project (at your project's root) and add the following code snippet to the allprojects/repositories section:
+The app uses Maven to load the tru.ID Android SDK:
+
+```groovy
+    maven {
+        url "https://gitlab.com/api/v4/projects/22035475/packages/maven"
+    }
+ ```
+
+ Now add the dependency, and don't forget to Sync the project.
+```groovy
+implementation 'id.tru.sdk:tru-sdk-android:0.0.1'
+```
+
+** The `tru-sdk-android` is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore we have set minSdkVersion = 21.
+
+Write a small RedirectManager in order to keep things tidy, and obtain a TruSDK instance that will be used to perform the network request with PhoneCheck URL over mobile data connection.
 
 ```kotlin
 class RedirectManager {
@@ -309,15 +213,16 @@ Now it's time to execute the request and find out if the phone number was verifi
 
                 withContext(Dispatchers.Main) {
                     if (phoneCheckResult.match) {
-                    	resultIndicator.text = "Phone verification complete"
+                        resultIndicator.text = "Phone verification complete"
                     } else {
                         resultIndicator.text = "Phone verification failed"
                     }
                 }
     }
 ```
+There you go, based on the PhoneCheckResult you may notify the user that the authentication has been complete, and probably jump on to the next screen.
 
-### Step 4: Running the server
+### Step 4: To test this end to end, run the server locally
 [example server](https://tru.id/docs/phone-check/getting-started-android#2-setup-the-nodejs-example-server)
 
 Once you have your server up and running make a copy of the app/tru.properties.example file 
@@ -332,7 +237,7 @@ tru.properties:
 EXAMPLE_SERVER_BASE_URL="https://example.com"
 ```
 
-## Running the app/ Demo time
+Let's try out what we have so far!
 
 Now that your code is complete, you can run the application on a real device. Bear in mind that SIM card based authentication would not be possible against an emulator.
 
