@@ -15,7 +15,7 @@ A basic Android application that implements a phone number authentication/sign-i
 
 The completed Android sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. The repo includes a README with documentation for running and exploring the code.
 
-Let's run this step by step ...
+Let's run through this application step by step ...
 
 ## Before you begin
 
@@ -32,23 +32,23 @@ Let's run this step by step ...
 
 ## Step 1: Let's start by creating a new project
 
-First, you have to create a new Android application using Android Studio. The app name is PhoneNumberAuthenticationDemo. The package name is id.tru.com.phonenumberauthenticationdemo.
+First, you have to create a new Android application using Android Studio. The app name is SIMAuthentication. The package name is `id.tru.authentication.demo`.
 Click through the wizard, ensuring that Empty Activity is selected. Leave the Activity Name set to MainActivity, and leave the Layout Name set to activity_main.
 
 
 ## Step 2: Phone number authentication UI
-To allow the end user to input his phone number we use material.EditText object.
-Code to be updated here.
-
+To allow the end user to input his phone number we use Material Design EditText object.
+The first screen will be our Verification screen on which the user has to add his phone number. After adding his phone number, the user will click on the "Verify my phone number" button,
 
 The main screen will look like this:
-[TODO insert image](insertImage)
-
-
-
+[Design preview](https://github.com/tru-ID/sim-card-auth-android/tree/main/images/main_layout.png)
 
 
 ## Step 3: PhoneCheck workflow
+
+The sequence diagram below shows the complete PhoneCheck Workflow.
+(TODO 1 create small diagram)[...]
+
 In order to communicate with our local server we will integrate Retrofit and relevant JSON converters:
 
 ```groovy
@@ -136,7 +136,7 @@ Now we are ready to create the PhoneCheck using the provided phone number:
 
 ### 3.2 Navigate to the PhoneCheck URL
 At this point you're going to add `tru-sdk-android` SDK to your project.
-The purpose of using the SDK is to make sure execution of a phone check verification request is done against mobile data connection.
+The purpose of using the SDK is to make sure execution of a phone check verification request is done against the mobile data connection.
 
 Edit the build.gradle for your project (at your project's root) and add the following code snippet to the allprojects/repositories section:
 The app uses Maven to load the tru.ID Android SDK:
@@ -241,7 +241,7 @@ Let's try out what we have so far!
 
 Now that your code is complete, you can run the application on a real device. Bear in mind that SIM card based authentication would not be possible against an emulator.
 
-[TODO include gif]()
+[TODO 2 include gif]()
 
 **Troubleshooting**
 Don't forget the PhoneCheck validation requires the device to enable Mobile Data.
@@ -286,7 +286,7 @@ Alternatively, if you just want to use platform features and no extra dependenci
 If your application targets **Accessibility**, you will find the phone number verification flow perfectly clear for those users that rely on TalkBack. There is no need to be pasting digits into small boxes, or attempt to replay the code from another application.
 
 
-###### Phil: very interesting read here https://www.w3.org/WAI/WCAG21/Understanding/accessible-authentication what if we add a section on this?
+
 
 
 
