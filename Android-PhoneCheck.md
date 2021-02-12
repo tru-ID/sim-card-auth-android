@@ -224,7 +224,7 @@ Now it's time to execute the request and find out if the phone number was verifi
 ```
 There you go, based on the PhoneCheckResult you may notify the user that the authentication has been complete, and probably jump on to the next screen.
 
-![Verification succesfull](https://github.com/tru-ID/sim-card-auth-android/tree/main/images/verification_succesfull.png)
+![Verification complete](https://github.com/tru-ID/sim-card-auth-android/tree/main/images/verification_done.png)
 
 ### Let's try this end to end
 [example server](https://tru.id/docs/phone-check/getting-started-android#2-setup-the-nodejs-example-server)
@@ -241,9 +241,9 @@ Now that your code is complete, you can run the application on a real device. Be
 Enter the phone number for the mobile device in the UI in the format +{country_code}{number} e.g. `+447900123456`
 Press the done keyboard key or touch the "Verify my phone number" button
 
-[TODO include gif]()
 
 **Troubleshooting**
+
 Don't forget the PhoneCheck validation requires the device to enable Mobile Data.
 Because we have attached a *HttpLoggingInterceptor* you can use adb logs to debug your PhoneCheck:
 ```code
