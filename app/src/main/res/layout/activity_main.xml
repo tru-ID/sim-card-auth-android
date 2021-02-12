@@ -7,18 +7,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingTop="@dimen/activity_top_margin"
     android:paddingRight="@dimen/activity_horizontal_margin">
-
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="200dp"
-        android:layout_height="150dp"
-        android:gravity="center_horizontal"
-        android:src="@drawable/bitmap"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/sign_in_header"
@@ -28,7 +18,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logo" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/input_layout"
@@ -66,6 +56,7 @@
         android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@color/colorPrimary"
         android:text="@string/action_sign_in"
+        android:onClick="initSignIn"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="@+id/input_layout"
@@ -83,7 +74,23 @@
         android:visibility="invisible"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login"/>
+        app:layout_constraintTop_toBottomOf="@+id/login">
+
+    <cdflynn.android.library.checkview.CheckView
+        android:id="@+id/progress_checkview"
+        android:layout_width="@dimen/check_size"
+        android:layout_height="@dimen/check_size"
+        android:layout_gravity="center_horizontal"
+        app:checkView_strokeColor="@color/green"
+        app:checkView_strokeWidth="@dimen/check_stroke_width"/>
+
+        <TextView
+            android:id="@+id/progress_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"/>
+
+    </LinearLayout>
 
 
 

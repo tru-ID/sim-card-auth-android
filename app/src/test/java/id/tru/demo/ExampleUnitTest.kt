@@ -1,4 +1,4 @@
-package id.tru.authentication
+package id.tru.demo
 
 import org.junit.Test
 
