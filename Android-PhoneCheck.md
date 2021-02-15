@@ -91,14 +91,7 @@ Create a `tru-id.properties` file at the root of your project and set the value 
 EXAMPLE_SERVER_BASE_URL=https://{subdomain}.loca.lt
 ```
 
-Next, add references to Retrofit:
-
-```groovy
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-```
-
-To perform network operations in your application, your `AndroidManifest.xml` must include the following permissions:
+To perform network operations in your application such as making requests to the verification server, your `AndroidManifest.xml` must include the following permissions:
 
 ```xml
 <uses-permission android:name="android.permission.INTERNET" />
@@ -106,41 +99,6 @@ To perform network operations in your application, your `AndroidManifest.xml` mu
 ```
 
 Both the Internet and `ACCESS_NETWORK_STATE` permissions are [normal permissions](https://developer.android.com/guide/topics/permissions/overview#normal-dangerous), which means they're granted at install time and don't need to be requested at runtime.
-
-Create an empty `ApiService` interface in `api/ApiService.kt` that will be used by Retrofit:
-
-```kotlin
-interface ApiService {
-}
-```
-
-Create a new file, `api/RetrofitBuilder.kt`, and within it create a Retrofit instance using `Retrofit.Builder`, passing your `ApiService` interface to generate an implementation. 
-
-```kotlin
-object RetrofitBuilder {
-    val apiClient: ApiService by lazy {
-
-        val httpLoggingInterceptor = HttpLoggingInterceptor()
-        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-        val okHttpClient = OkHttpClient()
-            .newBuilder()
-            //httpLogging interceptor for logging network requests
-            .addInterceptor(httpLoggingInterceptor)
-            .build()
-
-        Retrofit.Builder()
-            .baseUrl(BuildConfig.SERVER_BASE_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-            .create(ApiService::class.java)
-    }
-}
-```
-Note that the `BuildConfig.SERVER_BASE_URL` will be set with the value of `EXAMPLE_SERVER_BASE_URL` you defined in `tru-id.properties`.
-
-We have also added the `HttpLoggingInterceptor` just so we can check what is going on every step of the way.
 
 ### 1. Creating a SubscriberCheck
 
@@ -180,16 +138,16 @@ TODOs:
 
 ---
 
-```kotlin
-interface ApiService {
+**TODO: check through the ordering of the following and flesh out the descriptive wording, if required**
 
-    @Headers("Content-Type: application/json")
-    @POST("/check")
-    suspend fun getSubscriberCheck(@Body user: SubscriberCheckPost): Response<SubscriberCheck>
-}
+Next, add references to Retrofit:
+
+```groovy
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 ```
 
-Let's create the models for our network operations in a new file `Model.kt`:
+Let's create the models for our network operations in a new file `data/Model.kt`:
 
 ```kotlin
 data class SubscriberCheckPost(
@@ -204,6 +162,45 @@ data class SubscriberCheck(
     val check_id: String
 )
 ```
+
+Create an `ApiService` interface in `api/ApiService.kt` that makes use of the models and will be used by Retrofit:
+
+```kotlin
+interface ApiService {
+
+    @Headers("Content-Type: application/json")
+    @POST("/check")
+    suspend fun getSubscriberCheck(@Body user: SubscriberCheckPost): Response<SubscriberCheck>
+}
+```
+
+Create a new file, `api/RetrofitBuilder.kt`, and within it create a Retrofit instance using `Retrofit.Builder`, passing the `ApiService` interface to generate an implementation. 
+
+```kotlin
+object RetrofitBuilder {
+    val apiClient: ApiService by lazy {
+
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+
+        val okHttpClient = OkHttpClient()
+            .newBuilder()
+            //httpLogging interceptor for logging network requests
+            .addInterceptor(httpLoggingInterceptor)
+            .build()
+
+        Retrofit.Builder()
+            .baseUrl(BuildConfig.SERVER_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(ApiService::class.java)
+    }
+}
+```
+Note that the `BuildConfig.SERVER_BASE_URL` will be set with the value of `EXAMPLE_SERVER_BASE_URL` you defined in `tru-id.properties`.
+
+We have also added the `HttpLoggingInterceptor` just so we can check what is going on every step of the way.
 
 Now we are ready to create the SubscriberCheck using the provided phone number:
 
