@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 def props = new Properties()
-file("truid.properties").withInputStream { props.load(it) }
+file("tru-id.properties").withInputStream { props.load(it) }
 
 android {
     compileSdkVersion 30

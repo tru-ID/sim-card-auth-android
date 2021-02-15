@@ -22,7 +22,7 @@ You will need:
 - Clone or unzip the PhoneCheckExample into a directory.
 - Open the project with your Android Capable IDE
 - Once you have your server up and running make a note of your server URL.
-Create a file named truid.properties in the root directory of your project and update the configuration value to be the URL of your example server
+Create a file named `tru-id.properties` in the root directory of your project and update the configuration value to be the URL of your example server
 ```code
 EXAMPLE_SERVER_BASE_URL="https://example.com"
 ```
