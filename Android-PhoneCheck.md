@@ -2,22 +2,19 @@
 
 ## Introduction
 
-Validating user identity is incredibly important in mobile development, and developers need reliable ways to confirm the identities of their users.
-In phone authentication, the user has to verify his identity with his phone number.
-Most phone-based authentication methods today simply use the mobile number alone, and rely on SMS to send a one-time code, or a voice call to that number.
-But these mechanisms don't reliably prove possession, and they pose security flaws due to potential SIM swap or mobile phone number recycling.
+Validating user identity is incredibly important in mobile development, and developers need reliable ways to confirm the identities of their users. The most common approaches to this are social login or, as seen with apps such as WhatsApp, Telegram, Line, WeChat and many more, the phone number. Using a phone number as a unique identifier on a mobile application, verified via an SMS PIN code, makes logical sense. Unfortunately, there are [flaws with SMS based verification](https://tru.id/blog/msisdn-vs-imsi-and-mobile-identity) that leave a user open to SIM Swap attacks.
 
-The key to authenticating a mobile user quickly, securely and reliably is to use their mobile number, but perform the verification using the SIM card in the mobile phone. 
-The tru.ID [PhoneCheck Workflow](link) confirms the ownership of a mobile phone number by verifying the possession of an active SIM card with the same number.
-That's right, no more one-time code exchange, no more logic around PIN mis-type or retry due to delivery failure.
-This means with Instant PhoneCheck the user never leaves your app, and the entire verification happens seamlessly. Fewer dependencies, better security and a better experience.
+Along with adding crytographically secure phone verfication to an application and protecting the user from SIM swap attacks, SIM card based authentication also improves the user experience. No more one-time code exchange, custom logic to handle PIN mis-type or retry due to SMS delivery failure. The user never leaves the app and the entire verification happens seamlessly.
 
-This article describes how to implement a phone number verification flow in Android using the tru.ID PhoneCheck Workflow.
+Fewer dependencies, better security and a better experience.
+
+In this tutorial we'll cover how to add SIM card based phone authentication to and Android application using [**tru.ID SubscriberCheck**](https://tru.id/docs/subscriber-check) which confirms the ownership of a mobile phone number by verifying the possession of an active SIM card with the same number and indicates when the SIM card associated with a phone number was last changed.
+
 **Estimated completion time: 20 mins**
 
 The completed Android sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. The repo includes a README with documentation for running and exploring the code.
 
-Let's run through this application step by step ...
+Let's run through building this application step by step ...
 
 ## Before you begin
 
