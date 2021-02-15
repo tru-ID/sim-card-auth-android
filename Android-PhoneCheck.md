@@ -212,7 +212,7 @@ Now we are ready to create the SubscriberCheck using the provided phone number:
     }
 ```
 
-### 2. Using the **tru.ID** to request the SubscriberCheck URL
+### 2. Using the **tru.ID** SDK to Request the SubscriberCheck URL
 
 At this point you're going to add the `tru-sdk-android` SDK to your project to enable the SubscriberCheck URL to be requested over a mobile data connection.
 
