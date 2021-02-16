@@ -31,4 +31,4 @@ app/.idea/*
 ktlint
 
 # Example app properties
-app/tru.properties
+app/tru-id.properties
