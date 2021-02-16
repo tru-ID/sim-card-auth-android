@@ -1,4 +1,4 @@
-# How to Add SIM Card Based Authentication to your Android App [with tru.ID]
+# How to Add SIM Card Based Mobile Authentication to your Android App [with tru.ID]
 
 Validating user identity is incredibly important in mobile applications so developers need reliable ways to confirm the identities of their users. The most common approaches to this are social login or, as seen with apps such as WhatsApp, Telegram, Line, WeChat and many more, the mobile phone number. Using a mobile phone number as a unique identifier on a mobile application, verified via an SMS PIN code, makes logical sense. Unfortunately, there are [flaws with SMS-based verification](https://tru.id/blog/msisdn-vs-imsi-and-mobile-identity) that leave a user open to SIM Swap attacks.
 
@@ -85,7 +85,7 @@ The sequence diagram below shows the complete SubscriberCheck Workflow:
 
 In order to communicate with our local server we will integrate Retrofit and relevant JSON converters.
 
-Create a `tru-id.properties` file at the root of your project and set the value of `EXAMPLE_SERVER_BASE_URL` to be the public URL of your development server:
+Create a `app/tru-id.properties` file and set the value of `EXAMPLE_SERVER_BASE_URL` to be the public URL of your development server:
 
 ```
 EXAMPLE_SERVER_BASE_URL=https://{subdomain}.loca.lt
@@ -207,7 +207,7 @@ Now we are ready to create the SubscriberCheck using the provided phone number:
 ```kotlin
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
-            val phoneCheck = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
+            val check = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
         }
     }
 ```
@@ -343,7 +343,7 @@ Press the done keyboard key or touch the "Verify my phone number" button.
 
 **TODO: add video of app in action**
 
-Congratulations! You've finished PhoneCheck Tutorial for Android.
+Congratulations! You've finished **SIM Card Based Mobile Authentication for Android** Tutorial.
 You can continue to play with and adjust the code you've developed here, or check out the Next Steps below.
 
 
@@ -355,7 +355,7 @@ You can view a completed version of this sample app in the [sim-card-auth-androi
 
 One option is to use [Play Services auth-api-phone library](https://developers.google.com/identity/sms-retriever/request#1_obtain_the_users_phone_number) hint picker that prompts the user to choose from the phone numbers stored on the device and thereby avoid having to manually type a phone number. 
 
-
+**TODO: decide what to do with this part** 
 What if my device supports multiple SIM cards?
 Alternatively, if you just want to use platform features and no extra dependencies, Android 5.1 adds [support](https://developer.android.com/about/versions/android-5.1.html#multisim) for using more than one cellular carrier SIM card at a time. This feature lets users activate and use additional SIMs on devices that have two or more SIM card slots, but required READ_PHONE_STATE permission.
 
@@ -384,8 +384,8 @@ If your application targets **Accessibility**, you will find the phone number ve
 
 ## Troubleshooting
 
-Don't forget the PhoneCheck validation requires the device to enable Mobile Data.
-Because we have attached a *HttpLoggingInterceptor* you can use adb logs to debug your PhoneCheck:
+Don't forget the SubscriberCheck validation requires the device to enable Mobile Data.
+Because we have attached a *HttpLoggingInterceptor* you can use adb logs to debug your SubscriberCheck:
 ```code
 I/okhttp.OkHttpClient: --> POST https://mylocalserver.example/check
 I/okhttp.OkHttpClient: {"phone_number":"+447XXXXXXXXX"}
