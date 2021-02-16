@@ -10,10 +10,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import id.tru.authentication.demo.api.RedirectManager
 import id.tru.authentication.demo.api.RetrofitBuilder
-import id.tru.authentication.demo.data.ConnectivitySettingsContract
-import id.tru.authentication.demo.data.PhoneCheck
-import id.tru.authentication.demo.data.PhoneCheckPost
-import id.tru.authentication.demo.data.PhoneCheckResult
+import id.tru.authentication.demo.data.*
 import id.tru.authentication.demo.databinding.ActivityMainBinding
 import id.tru.authentication.demo.util.isPhoneNumberValid
 import id.tru.sdk.TruSDK
@@ -25,7 +22,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity() {
 
     private val redirectManager by lazy { RedirectManager() }
-    private lateinit var phoneCheck: PhoneCheck
+    private lateinit var subscriberCheck: SubscriberCheck
 
     private var _binding: ActivityMainBinding? = null
     // This property is only valid between onCreateView and onDestroyView.
@@ -48,7 +45,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    /** Called when the user taps the Sign In button */
+    /** Called when the user taps the button */
     fun initSignIn(view: View) {
         Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
         // close virtual keyboard when sign in starts
@@ -72,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun initVerification() {
         resetProgress()
-        createPhoneCheck()
+        createSubscriberCheck()
     }
 
     private fun resetProgress() {
@@ -81,8 +78,8 @@ class MainActivity : AppCompatActivity() {
         binding.progressTv.text = getString(R.string.phone_check_step1)
     }
 
-    // Step 1: Create a Phone Check
-    private fun createPhoneCheck() {
+    // Step 1: Create a Subscriber Check
+    private fun createSubscriberCheck() {
         if (!isPhoneNumberValid(binding.phoneNumber.text.toString())) {
             binding.progressTv.text = getString(R.string.phone_check_step1_errror)
             return
@@ -91,11 +88,11 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = RetrofitBuilder.apiClient.getPhoneCheck(
-                        PhoneCheckPost(binding.phoneNumber.text.toString()))
+                val response = RetrofitBuilder.apiClient.getSubscriberCheck(
+                        SubscriberCheckPost(binding.phoneNumber.text.toString()))
 
                 if (response.isSuccessful && response.body() != null) {
-                    phoneCheck = response.body() as PhoneCheck
+                    subscriberCheck = response.body() as SubscriberCheck
 
                     withContext(Dispatchers.Main) {
                         binding.progressTv.text = getString(R.string.phone_check_step2)
@@ -116,26 +113,26 @@ class MainActivity : AppCompatActivity() {
     // STEP 2: Open checkUrl
     private fun openCheckURL() {
         CoroutineScope(Dispatchers.IO).launch {
-            redirectManager.openCheckUrl(phoneCheck.check_url)
+            redirectManager.openCheckUrl(subscriberCheck.check_url)
 
             withContext(Dispatchers.Main) {
                 binding.progressTv.text = getString(R.string.phone_check_step3)
             }
 
             // Step 3: Get Phone Check Result
-            getPhoneCheckResult()
+            getSubscriberCheckResult()
         }
     }
 
     // Step 3: Get Phone Check Result
-    private fun getPhoneCheckResult() {
+    private fun getSubscriberCheckResult() {
         CoroutineScope(Dispatchers.IO).launch {
-            val response = RetrofitBuilder.apiClient.getPhoneCheckResult(phoneCheck.check_id)
+            val response = RetrofitBuilder.apiClient.getSubscriberCheckResult(subscriberCheck.check_id)
             if (response.isSuccessful && response.body() != null) {
-                val phoneCheckResult = response.body() as PhoneCheckResult
+                val checkResult = response.body() as SubscriberCheckResult
 
                 withContext(Dispatchers.Main) {
-                    if (phoneCheckResult.match) {
+                    if (checkResult.match) {
                         binding.progressCheckview.check()
                         binding.progressTv.text = null
                     } else {
