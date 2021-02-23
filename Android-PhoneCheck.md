@@ -68,12 +68,46 @@ Click through the wizard, ensuring that "Empty Activity" is selected. Leave the 
 
 The first screen will be our Verification screen on which the user has to enter their phone number. After adding their phone number, the user will click on a "Verify my phone number" button to initiate the verification worflow.
 
-**TODO: Can we provide a basic copy & paste XML for the activity?**
+The user interface is straight forward: a ConstraintLayout with one TextInputEditText `phone_number` inside a TextInputLayout `input_layout` for phone number input and a `verify` Button, followed by a `loading_layout` where the user is updated on the progress, as we will see later on.
+![Activity_main design view](images/activity_main_design.png)
+
 
 The main screen will look like this:
 
 ![Design preview](images/main_layout.png)
 
+Bind the verification workflow to the verify button:
+
+```kotlin
+    binding.verify.setOnClickListener {
+        initVerification()
+     }
+```
+
+- Each time a verification is started we invalidate the UI, making sure all fields are reset, in order to cater for subsequent verification attempts:
+```kotlin
+    /** Called when the user taps the verify button */
+    fun initVerification() {
+        Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
+        // close virtual keyboard when sign in starts
+        binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!isMobileDataConnectivityEnabled()) {
+                startSettingsForResult.launch(CONNECTIVITY_SETTINGS_ACTION)
+                return
+            }
+        }
+        startVerification()
+    }
+
+    private fun startVerification() {
+        invalidateUI()
+        createSubscriberCheck()
+    }
+```
+
+Now let's proceed to initiate a SubscriberCheck workflow, as described in the next section.
 
 ## SubscriberCheck Workflow
 
@@ -83,7 +117,6 @@ The sequence diagram below shows the complete SubscriberCheck Workflow:
 
 ![SubscriberCheck Workflow](images/PhoneCheck_Workflow.jpeg)
 
-In order to communicate with our local server we will integrate Retrofit and relevant JSON converters.
 
 Create a `app/tru-id.properties` file and set the value of `EXAMPLE_SERVER_BASE_URL` to be the public URL of your development server:
 
@@ -100,54 +133,19 @@ To perform network operations in your application such as making requests to the
 
 Both the Internet and `ACCESS_NETWORK_STATE` permissions are [normal permissions](https://developer.android.com/guide/topics/permissions/overview#normal-dangerous), which means they're granted at install time and don't need to be requested at runtime.
 
-### 1. Creating a SubscriberCheck
-
-To start the phone number verification flow in an Android app, the user enters their phone number and either presses the done keyboard key or touch the "Verify my phone number" button. The application then sends the phone number to your verification server that will create a SubscriberCheck resource on the **tru.ID** platform.
-
----
-
-TODOs:
-
-- show how to bind to the button click event?
-    ```
-            android:onClick="initSignIn"
-    ```
-- show adding `initSignIn` to `MainActivity.kt`**
-    ```
-    /** Called when the user taps the Sign In button */
-    fun initSignIn(view: View) {
-        Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
-        // close virtual keyboard when sign in starts
-        binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!isMobileDataConnectivityEnabled()) {
-                startSettingsForResult.launch(CONNECTIVITY_SETTINGS_ACTION)
-                return
-            }
-        }
-        initVerification()
-    }
-
-    private fun initVerification() {
-        resetProgress() // could omit this
-        createSubscriberCheck()
-    }
-    ```
-
-
----
-
-**TODO: check through the ordering of the following and flesh out the descriptive wording, if required**
-
-Next, add references to Retrofit:
+In order to communicate with our local server we will integrate Retrofit and relevant JSON converters:
 
 ```groovy
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
 ```
 
-Let's create the models for our network operations in a new file `data/Model.kt`:
+### 1. Creating a SubscriberCheck
+
+To start the phone number verification flow in an Android app, the user enters their phone number and either presses the done keyboard key or touch the "Verify my phone number" button. The application then sends the phone number to your verification server that will create a SubscriberCheck resource on the **tru.ID** platform.
+
+In order to create a SubscriberCheck a `phone_number` is required, and once created, the SubscriberCheck will contain the `check_url` and the `check_id`.
+Let's create these required models for our network operations in a new file `data/Model.kt`:
 
 ```kotlin
 data class SubscriberCheckPost(
@@ -163,7 +161,7 @@ data class SubscriberCheck(
 )
 ```
 
-Create an `ApiService` interface in `api/ApiService.kt` that makes use of the models and will be used by Retrofit:
+We create an `ApiService` interface in `api/ApiService.kt` that makes use of the models:
 
 ```kotlin
 interface ApiService {
@@ -175,6 +173,7 @@ interface ApiService {
 ```
 
 Create a new file, `api/RetrofitBuilder.kt`, and within it create a Retrofit instance using `Retrofit.Builder`, passing the `ApiService` interface to generate an implementation. 
+We are adding the `HttpLoggingInterceptor` just so we can check what is going on every step of the way.
 
 ```kotlin
 object RetrofitBuilder {
@@ -199,8 +198,6 @@ object RetrofitBuilder {
 }
 ```
 Note that the `BuildConfig.SERVER_BASE_URL` will be set with the value of `EXAMPLE_SERVER_BASE_URL` you defined in `tru-id.properties`.
-
-We have also added the `HttpLoggingInterceptor` just so we can check what is going on every step of the way.
 
 Now we are ready to create the SubscriberCheck using the provided phone number:
 

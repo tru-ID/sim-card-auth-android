@@ -42,11 +42,21 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
+        binding.verify.setOnClickListener {
+            initVerification()
+        }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
 
-    /** Called when the user taps the button */
-    fun initSignIn(view: View) {
+    // region internal
+
+    /** Called when the user taps the verify button */
+    private fun initVerification() {
         Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
         // close virtual keyboard when sign in starts
         binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
@@ -57,22 +67,15 @@ class MainActivity : AppCompatActivity() {
                 return
             }
         }
-        initVerification()
+        startVerification()
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
-    }
-
-    // region internal
-
-    private fun initVerification() {
-        resetProgress()
+    private fun startVerification() {
+        invalidateUI()
         createSubscriberCheck()
     }
 
-    private fun resetProgress() {
+    private fun invalidateUI() {
         binding.loadingLayout.visibility = View.VISIBLE
         binding.progressCheckview.uncheck()
         binding.progressTv.text = getString(R.string.phone_check_step1)
