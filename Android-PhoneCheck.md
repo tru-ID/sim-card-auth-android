@@ -369,12 +369,6 @@ Alternatively, if you just want to use platform features and no extra dependenci
     }
 ```
 
-#### Accessibility
-
-**TODO: let's decide what to do with this. Maybe it should be moved up as a benefit related to the UX**
-
-If your application targets **Accessibility**, you will find the phone number verification flow perfectly clear for those users that rely on TalkBack. There is no need to be pasting digits into small boxes, or attempt to replay the code from another application.
-
 
 ## Troubleshooting
 
