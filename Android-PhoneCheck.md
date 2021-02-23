@@ -63,13 +63,14 @@ With the development server setup we can move on to building the Android applica
 First, you have to create a new Android application using Android Studio. The app name is "SIMAuthentication". The package name is `id.tru.authentication.demo`.
 Click through the wizard, ensuring that "Empty Activity" is selected. Leave the "Activity Name" set to `MainActivity`, and leave the "Layout Name" set to `activity_main`.
 
+The `tru-sdk-android` is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore pick minSdkVersion = 21 once creating the project.
 
 ## Phone Number Authentication UI
 
 The first screen will be our Verification screen on which the user has to enter their phone number. After adding their phone number, the user will click on a "Verify my phone number" button to initiate the verification worflow.
 
 The user interface is straight forward: a ConstraintLayout with one TextInputEditText `phone_number` inside a TextInputLayout `input_layout` for phone number input and a `verify` Button, followed by a `loading_layout` where the user is updated on the progress, as we will see later on.
-![Activity_main design view](images/activity_main_design.png)
+![Activity_main design view](images/activity_main_preview.png)
 
 
 The main screen will look like this:
@@ -227,10 +228,6 @@ Add the SDK dependency and don't forget to Sync the project.
 implementation 'id.tru.sdk:tru-sdk-android:0.0.1'
 ```
 
-**TODO: Where did we set `minSdkVersion`? Should we do this when creating the Android project? If we state this earlier we can remove the following statement**
-
-** The `tru-sdk-android` is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore we have set minSdkVersion = 21.
-
 Create `api/RedirectManager.kt` to encapsulate obtaining a `TruSDK` instance and performing the network request with SubscriberCheck URL over the mobile data connection.
 
 ```kotlin
@@ -383,6 +380,7 @@ If your application targets **Accessibility**, you will find the phone number ve
 
 Don't forget the SubscriberCheck validation requires the device to enable Mobile Data.
 Because we have attached a *HttpLoggingInterceptor* you can use adb logs to debug your SubscriberCheck:
+
 ```code
 I/okhttp.OkHttpClient: --> POST https://mylocalserver.example/check
 I/okhttp.OkHttpClient: {"phone_number":"+447XXXXXXXXX"}
