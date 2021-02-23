@@ -328,7 +328,7 @@ There you go, based on the `subscriberCheckResult` you may notify the user that 
 
 ![Verification complete](images/verification_done.png)
 
-### Try Out SIM Card Base Authentication
+### Try Out SIM Card Based Authentication
 
 Now that your code is complete, you can run the application on a real device. Bear in mind that SIM card based authentication is not be possible against an emulator.
 
