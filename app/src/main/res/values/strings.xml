@@ -13,10 +13,10 @@
     <string name="helper_text">Phone number with country code</string>
 
     <!-- Phone check steps -->
-    <string name="phone_check_step1"> Validating Phone Number Input ...</string>
-    <string name="phone_check_step1_errror"> Invalid phone number !</string>
-    <string name="phone_check_step2"> Initiating Phone Verification ...</string>
-    <string name="phone_check_step3"> Creating Mobile Data Session ...</string>
-    <string name="phone_check_complete"> Verification succesfull </string>
-    <string name="phone_check_error"> Verification failed</string>
+    <string name="phone_check_step1">Validating Phone Number Input ...</string>
+    <string name="phone_check_step1_errror">Invalid phone number !</string>
+    <string name="phone_check_step2">Initiating Phone Verification ...</string>
+    <string name="phone_check_step3">Creating Mobile Data Session ...</string>
+    <string name="phone_check_complete">Phone verification failed</string>
+    <string name="phone_check_error">Phone verification complete</string>
 </resources>

@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     // Step 2: Open the check_url
-                    openCheckURL()
+                    openCheckURL(subscriberCheck)
                 } else {
                     // Show API error.
                     updateUIonError("Error Occurred: ${response.message()}")
@@ -114,9 +114,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     // STEP 2: Open checkUrl
-    private fun openCheckURL() {
+    private fun openCheckURL(check: SubscriberCheck) {
         CoroutineScope(Dispatchers.IO).launch {
-            redirectManager.openCheckUrl(subscriberCheck.check_url)
+            redirectManager.openCheckUrl(check.check_url)
 
             withContext(Dispatchers.Main) {
                 binding.progressTv.text = getString(R.string.phone_check_step3)
@@ -132,16 +132,20 @@ class MainActivity : AppCompatActivity() {
         CoroutineScope(Dispatchers.IO).launch {
             val response = RetrofitBuilder.apiClient.getSubscriberCheckResult(subscriberCheck.check_id)
             if (response.isSuccessful && response.body() != null) {
-                val checkResult = response.body() as SubscriberCheckResult
+                val subscriberCheckResult = response.body() as SubscriberCheckResult
 
-                withContext(Dispatchers.Main) {
-                    if (checkResult.match) {
-                        binding.progressCheckview.check()
-                        binding.progressTv.text = null
-                    } else {
-                        binding.progressTv.text = getString(R.string.phone_check_error)
-                    }
-                }
+                updateUI(subscriberCheckResult)
+            }
+        }
+    }
+
+    private suspend fun updateUI(subscriberCheckResult: SubscriberCheckResult) {
+        withContext(Dispatchers.Main) {
+            if (subscriberCheckResult.match && subscriberCheckResult.no_sim_change) {
+                binding.progressCheckview.check()
+                binding.progressTv.text = getString(R.string.phone_check_complete)
+            } else {
+                binding.progressTv.text = getString(R.string.phone_check_error)
             }
         }
     }

@@ -17,6 +17,8 @@ data class SubscriberCheck(
 data class SubscriberCheckResult(
         @SerializedName("match")
         val match: Boolean,
+        @SerializedName("no_sim_change")
+        val no_sim_change: Boolean,
         @SerializedName("check_id")
         val check_id: String
 )

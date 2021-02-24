@@ -205,8 +205,16 @@ Now we are ready to create the SubscriberCheck using the provided phone number:
 ```kotlin
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
-            val check = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
+            val subscriberCheck = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
         }
+    }
+```
+
+At this point we can update the UI, to let the user know the Phone Verification is in progress:
+
+```kotlin
+    withContext(Dispatchers.Main) {
+        binding.progressTv.text = "Initiating Phone Verification ..."
     }
 ```
 
@@ -242,16 +250,14 @@ class RedirectManager {
 
 Update the `createSubscriberCheck` function to use the `RedirectManager` to request the SubscriberCheck URL from the previous step. This enables the mobile network operator and the **tru.ID** platform to identify the phone number associated with the mobile data session.
 
-**TODO: check the following code. Not updated in the codbase. Could it be updated to match/pass in the check?**
-
 ```kotlin
     private val redirectManager by lazy { RedirectManager() }
 
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
-            val check = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
+            val subscriberCheck = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
 
-            openCheckURL(check)
+            openCheckURL(subscriberCheck)
         }
     }
 
@@ -295,11 +301,6 @@ interface ApiService {
 
 Now it's time to execute the request and find out if the phone number was verified successfully. Create a new `getSubscriberCheckResult` function and call it after the `redirectManager.openCheckUrl` call has completed:
 
-**TODO: can we update the codebase to reflect the code we walk the reader through?**
-
-**TODO: should what should we do if `match = true but no_sim_change = false`?**
-
-**TODO: maybe split the UI updates out into another follow-on paragraph with required code updates**
 
 ```kotlin
     private fun openCheckURL(check: SubscriberCheck) {
@@ -314,17 +315,27 @@ Now it's time to execute the request and find out if the phone number was verifi
         CoroutineScope(Dispatchers.IO).launch {
             val subscriberCheckResult = RetrofitBuilder.apiClient.getSubscriberCheckResult(check.check_id)
 
-                withContext(Dispatchers.Main) {
-                    if (subscriberCheckResult.match && subscriberCheckResult.no_sim_change) {
-                        resultIndicator.text = "Phone verification complete"
-                    } else {
-                        resultIndicator.text = "Phone verification failed"
-                    }
-                }
+            updateUI(subscriberCheckResult)
     }
 ```
 
 There you go, based on the `subscriberCheckResult` you may notify the user that the authentication has completed, and probably jump on to the next screen.
+
+```kotlin
+    private suspend fun updateUI(subscriberCheckResult: SubscriberCheckResult) {
+        withContext(Dispatchers.Main) {
+            if (subscriberCheckResult.match && subscriberCheckResult.no_sim_change) {
+                binding.progressCheckview.check()
+                binding.progressTv.text = "Phone verification complete"
+            } else {
+                binding.progressTv.text = "Phone verification failed"
+            }
+        } 
+    }
+```
+    
+The value of `no_sim_change` indicates if the SIM card has not been changed in the last 7 days.
+For example in the case of `match = true but no_sim_change = false` there is no confirmation that there have been no changes to this identity that may be suspect.
 
 ![Verification complete](images/verification_done.png)
 
