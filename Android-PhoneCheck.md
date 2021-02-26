@@ -10,6 +10,7 @@ Fewer dependencies, better security and a better experience.
 
 In this tutorial we'll cover how to add SIM card based phone authentication to and Android application using [**tru.ID SubscriberCheck**](https://tru.id/docs/subscriber-check).
 
+**TODO: move this into frontmatter**
 **Estimated completion time: 20 mins**
 
 The completed Android sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. The repo includes a README with documentation for running and exploring the code.
@@ -18,7 +19,7 @@ Let's run through building this application step by step ...
 
 ## Before you Begin
 
-To complete this tutorial you'll need an up to date version of [Android Studio]() installed, some basic knowledge of Kotlin programming and [Node.js]() installed. You'll also need a physical Android device with an active SIM card because SubscriberCheck verifies a phone number by making a web request over a mobile data session.
+To complete this tutorial you'll need an up to date version of [Android Studio](https://developer.android.com/studio) installed, some basic knowledge of Kotlin programming and [Node.js](https://nodejs.org/en/download/) installed. You'll also need a physical Android device with an active SIM card because SubscriberCheck verifies a phone number by making a web request over a mobile data session.
 
 ## Get Setup with **tru.ID**
 
@@ -28,13 +29,17 @@ Sign up for a [**tru.ID** account](https://tru.id/signup) which comes with some 
 $ npm install -g @tru_id/cli@canary
 ```
 
+**TODO: Phil  to publis new verison of CLI**
+
 Run `tru setup:credentials` using the credentials from the [**tru.ID** console](https://tru.id/console):
 
 ```bash
 $ tru setup:credentials {client_id} {client_secret} {data_residency}
 ```
 
-Install the [**tru.ID** development server]():
+**TODO: Phil  to publis new verison of Dev Server CLI**
+
+Install the CLI [development server plugin](https://github.com/tru-ID/cli-plugin-dev-server):
 
 ```bash
 $ tru plugins:install @tru_id/dev-server@canary
@@ -63,13 +68,108 @@ With the development server setup we can move on to building the Android applica
 First, you have to create a new Android application using Android Studio. The app name is "SIMAuthentication". The package name is `id.tru.authentication.demo`.
 Click through the wizard, ensuring that "Empty Activity" is selected. Leave the "Activity Name" set to `MainActivity`, and leave the "Layout Name" set to `activity_main`.
 
-The `tru-sdk-android` is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore pick minSdkVersion = 21 once creating the project.
+The [`tru-sdk-android`](https://github.com/tru-ID/tru-sdk-android) is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore pick minSdkVersion = 21 once creating the project.
 
 ## Phone Number Authentication UI
 
 The first screen will be our Verification screen on which the user has to enter their phone number. After adding their phone number, the user will click on a "Verify my phone number" button to initiate the verification worflow.
 
-The user interface is straight forward: a ConstraintLayout with one TextInputEditText `phone_number` inside a TextInputLayout `input_layout` for phone number input and a `verify` Button, followed by a `loading_layout` where the user is updated on the progress, as we will see later on.
+The user interface is straight forward: a `ConstraintLayout` with one `TextInputEditText` `phone_number` inside a `TextInputLayout` `input_layout` for phone number input and a Button to trigger the verification, followed by a `loading_layout` where the user is updated on the progress, as we will see later on.
+
+**TODO: make expandable in the tutorial**
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity"
+    android:paddingLeft="36dp"
+    android:paddingTop="220dp"
+    android:paddingRight="36dp">
+
+    <TextView
+        android:id="@+id/sign_in_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="To experience tru.ID verification, please enter your phone number"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/input_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:errorEnabled="true"
+        app:counterEnabled="true"
+        app:counterMaxLength="13"
+        android:layout_marginTop="20dp"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sign_in_header">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/phone_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="top|center"
+            android:hint="Phone number"
+            android:inputType="phone"
+            android:imeOptions="actionDone"
+            android:textSize="20sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="20dp"
+        android:background="#6200EE"
+        android:text="Verify my phone number"
+        android:onClick="initVerification"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/input_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/loading_layout"
+        app:layout_constraintVertical_bias="0.698" />
+
+    <LinearLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginTop="48dp"
+        android:orientation="vertical"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/login">
+
+        <TextView
+            android:id="@+id/progress_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"/>
+
+    </LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+```
+
 ![Activity_main design view](images/activity_main_preview.png)
 
 
@@ -77,34 +177,60 @@ The main screen will look like this:
 
 ![Design preview](images/main_layout.png)
 
-Bind the verification workflow to the verify button:
+Add `viewBinding` to `app/build.gradle`:
 
-```kotlin
-    binding.verify.setOnClickListener {
-        initVerification()
-     }
+```
+buildFeatures {
+    viewBinding true
+}
 ```
 
-- Each time a verification is started we invalidate the UI, making sure all fields are reset, in order to cater for subsequent verification attempts:
+Bind the verification workflow to the verify button within `app/src/main/java/id/tru/authentication/demo/MainActivity.kt`:
+
+```kotlin
+class MainActivity : AppCompatActivity() {
+
+    private var _binding: ActivityMainBinding? = null
+    // This property is only valid between onCreateView and onDestroyView.
+    private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        _binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+    }
+
+    binding.verify.setOnClickListener {
+        initVerification()
+    }
+
+    fun initVerification() {
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
+    }
+}
+
+```
+
+Each time a verification is started we invalidate the UI, making sure all fields are reset, in order to cater for subsequent verification attempts:
+
+**TODO: using a function `isMobileDataConnectivityEnabled` that doesn't yet exist. I've cut it down to functions that exist. We should review this to see what the minimum we should do here. Reset the basic progress indicator?**
+
 ```kotlin
     /** Called when the user taps the verify button */
-    fun initVerification() {
+    fun initVerification(view: View) {
         Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
         // close virtual keyboard when sign in starts
         binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!isMobileDataConnectivityEnabled()) {
-                startSettingsForResult.launch(CONNECTIVITY_SETTINGS_ACTION)
-                return
-            }
-        }
         startVerification()
     }
 
     private fun startVerification() {
-        invalidateUI()
-        createSubscriberCheck()
     }
 ```
 
@@ -122,7 +248,7 @@ The sequence diagram below shows the complete SubscriberCheck Workflow:
 Create a `app/tru-id.properties` file and set the value of `EXAMPLE_SERVER_BASE_URL` to be the public URL of your development server:
 
 ```
-EXAMPLE_SERVER_BASE_URL=https://{subdomain}.loca.lt
+EXAMPLE_SERVER_BASE_URL="https://{subdomain}.loca.lt"
 ```
 
 To perform network operations in your application such as making requests to the verification server, your `AndroidManifest.xml` must include the following permissions:
@@ -134,11 +260,28 @@ To perform network operations in your application such as making requests to the
 
 Both the Internet and `ACCESS_NETWORK_STATE` permissions are [normal permissions](https://developer.android.com/guide/topics/permissions/overview#normal-dangerous), which means they're granted at install time and don't need to be requested at runtime.
 
-In order to communicate with our local server we will integrate Retrofit and relevant JSON converters:
+In order to communicate with our local server the app needs to read in the `app/tru-id.properties` file containing the server URL and set a build configuration field. We want to include Retrofit, relevant JSON converters and OkHttp. Finally, include kotlinx-coroutine:
+
+Update `app/build.gradle` with the following additions:
 
 ```groovy
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+def props = new Properties()
+file("tru-id.properties").withInputStream { props.load(it) }
+
+android {
+    defaultConfig {
+        buildConfigField("String", "SERVER_BASE_URL", props.getProperty("EXAMPLE_SERVER_BASE_URL"))
+    }
+
+    dependencies {
+        implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+        implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
+        implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+        implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
+    }
+}
 ```
 
 ### 1. Creating a SubscriberCheck
@@ -146,6 +289,7 @@ In order to communicate with our local server we will integrate Retrofit and rel
 To start the phone number verification flow in an Android app, the user enters their phone number and either presses the done keyboard key or touch the "Verify my phone number" button. The application then sends the phone number to your verification server that will create a SubscriberCheck resource on the **tru.ID** platform.
 
 In order to create a SubscriberCheck a `phone_number` is required, and once created, the SubscriberCheck will contain the `check_url` and the `check_id`.
+
 Let's create these required models for our network operations in a new file `data/Model.kt`:
 
 ```kotlin
@@ -162,11 +306,10 @@ data class SubscriberCheck(
 )
 ```
 
-We create an `ApiService` interface in `api/ApiService.kt` that makes use of the models:
+We create an `ApiService` interface in `api/ApiService.kt` that makes use of the models, making a `POST` request to the `/check` endpoint on the development server:
 
 ```kotlin
 interface ApiService {
-
     @Headers("Content-Type: application/json")
     @POST("/check")
     suspend fun getSubscriberCheck(@Body user: SubscriberCheckPost): Response<SubscriberCheck>
@@ -174,7 +317,7 @@ interface ApiService {
 ```
 
 Create a new file, `api/RetrofitBuilder.kt`, and within it create a Retrofit instance using `Retrofit.Builder`, passing the `ApiService` interface to generate an implementation. 
-We are adding the `HttpLoggingInterceptor` just so we can check what is going on every step of the way.
+We are adding the `HttpLoggingInterceptor` so we can check what is going on every step of the way.
 
 ```kotlin
 object RetrofitBuilder {
@@ -200,23 +343,25 @@ object RetrofitBuilder {
 ```
 Note that the `BuildConfig.SERVER_BASE_URL` will be set with the value of `EXAMPLE_SERVER_BASE_URL` you defined in `tru-id.properties`.
 
-Now we are ready to create the SubscriberCheck using the provided phone number:
+Now we are ready to inform the user the verification process has started and create the SubscriberCheck using the provided phone number within `MainActivity.kt`:
 
 ```kotlin
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
-            val subscriberCheck = RetrofitBuilder.apiClient.getSubscriberCheck(SubscriberCheckPost(phone_number.text.toString()))
+            withContext(Dispatchers.Main) {
+                binding.progressTv.text = "Initiating Phone Verification ..."
+            }
+
+            val subscriberCheck = RetrofitBuilder.apiClient.getSubscriberCheck(
+                SubscriberCheckPost(binding.phoneNumber.text.toString())
+            )
         }
     }
 ```
 
-At this point we can update the UI, to let the user know the Phone Verification is in progress:
+**<----REVIEWED TO HERE---->**
 
-```kotlin
-    withContext(Dispatchers.Main) {
-        binding.progressTv.text = "Initiating Phone Verification ..."
-    }
-```
+---
 
 ### 2. Using the **tru.ID** SDK to Request the SubscriberCheck URL
 
