@@ -580,12 +580,12 @@ I/okhttp.OkHttpClient: --> POST https://mylocalserver.example/subscriber-check
 I/okhttp.OkHttpClient: {"phone_number":"+447XXXXXXXXX"}
 I/okhttp.OkHttpClient: --> END POST (32-byte body)
 I/okhttp.OkHttpClient: <-- 200 https://mylocalserver.example/check (1479ms)
-I/okhttp.OkHttpClient: {"check_id":"NEW_CHECK_ID","check_url":"https://eu.api.tru.id/phone_check/v0.1/checks/NEW_CHECK_ID/redirect"}
+I/okhttp.OkHttpClient: {"check_id":"NEW_CHECK_ID","check_url":"https://eu.api.tru.id/subscriber_check/v0.1/checks/NEW_CHECK_ID/redirect"}
 I/okhttp.OkHttpClient: <-- END HTTP (157-byte body)
 
-D/RedirectManager: Triggering open check url https://eu.api.tru.id/phone_check/v0.1/checks/NEW_CHECK_ID/redirect
+D/RedirectManager: Triggering open check url https://eu.api.tru.id/subscriber_check/v0.1/checks/NEW_CHECK_ID/redirect
 I/SDK::checkUrl: Triggering check url
-I/System.out: Response to https://eu.api.tru.id/phone_check/v0.1/checks/NEW_CHECK_ID/redirect
+I/System.out: Response to https://eu.api.tru.id/subscriber_check/v0.1/checks/NEW_CHECK_ID/redirect
 D/LoginActivity: redirect done [7961ms]
 I/okhttp.OkHttpClient: --> GET https://mylocalserver.example/subscriber-check/NEW_CHECK_ID
 I/okhttp.OkHttpClient: --> END GET
