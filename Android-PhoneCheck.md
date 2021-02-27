@@ -29,15 +29,13 @@ Sign up for a [**tru.ID** account](https://tru.id/signup) which comes with some 
 $ npm install -g @tru_id/cli@canary
 ```
 
-**TODO: Phil to publish new verison of CLI that removes the prompt at install**
+**TODO: Phil to publish new verison of CLI that removes the prompt at install and update /console to use the `setup:credentials` command**
 
 Run `tru setup:credentials` using the credentials from the [**tru.ID** console](https://tru.id/console):
 
 ```bash
 $ tru setup:credentials {client_id} {client_secret} {data_residency}
 ```
-
-**TODO: Phil to publish new verison of Dev Server CLI & sample server that supports SubscriberCheck**
 
 Install the CLI [development server plugin](https://github.com/tru-ID/cli-plugin-dev-server):
 
