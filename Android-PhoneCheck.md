@@ -1,5 +1,7 @@
 # How to Add SIM Card Based Mobile Authentication to your Android App [with tru.ID]
 
+**TODO: update all images to match tutorial**
+
 Validating user identity is incredibly important in mobile applications so developers need reliable ways to confirm the identities of their users. The most common approaches to this are social login or, as seen with apps such as WhatsApp, Telegram, Line, WeChat and many more, the mobile phone number. Using a mobile phone number as a unique identifier on a mobile application, verified via an SMS PIN code, makes logical sense. Unfortunately, there are [flaws with SMS-based verification](https://tru.id/blog/msisdn-vs-imsi-and-mobile-identity) that leave a user open to SIM Swap attacks.
 
 The solution? SIM card based authentication which confirms the ownership of a mobile phone number by verifying the possession of an active SIM card with the same number and indicates when the SIM card associated with a phone number was last changed.
