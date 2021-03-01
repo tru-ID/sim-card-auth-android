@@ -68,13 +68,20 @@ With the development server setup we can move on to building the Android applica
 First, you have to create a new Android application using Android Studio. The app name is "SIMAuthentication". The package name is `id.tru.authentication.demo`.
 Click through the wizard, ensuring that "Empty Activity" is selected. Leave the "Activity Name" set to `MainActivity`, and leave the "Layout Name" set to `activity_main`.
 
-The [`tru-sdk-android`](https://github.com/tru-ID/tru-sdk-android) is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore pick minSdkVersion = 21 once creating the project.
+The [`tru-sdk-android`](https://github.com/tru-ID/tru-sdk-android) is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore select minSdkVersion = 21 once creating the project.
 
 ## Phone Number Authentication UI
 
 The first screen will be our Verification screen on which the user has to enter their phone number. After adding their phone number, the user will click on a "Verify my phone number" button to initiate the verification worflow.
 
-The user interface is straight forward: a `ConstraintLayout` with one `TextInputEditText` `phone_number` inside a `TextInputLayout` `input_layout` for phone number input and a Button to trigger the verification, followed by a `loading_layout` where the user is updated on the progress, as we will see later on.
+The user interface is straight forward: a `ConstraintLayout` with one `TextInputEditText` `phone_number` inside a `TextInputLayout` `input_layout` for phone number input and a Button to trigger the verification, followed by a `progress_bar` where the user is updated on the progress, as we will see later on.
+
+Make sure to add the dependencies for `ConstraintLayout` and Material Components: 
+
+```groovy
+implementation 'androidx.constraintlayout:constraintlayout:<latest_version>'
+implementation 'com.google.android.material:material:<latest_version>'
+```
 
 **TODO: make expandable in the tutorial**
 
@@ -175,6 +182,7 @@ The main screen will look like this:
 
 ![Design preview](images/main_layout.png)
 
+To enable view binding, that allows you to more easily write code that interacts with views, set the viewBinding build option to true in the app/build.gradle file:
 Add `viewBinding` to `app/build.gradle`:
 
 ```
@@ -189,23 +197,27 @@ Bind the verification workflow to the verify button within `app/src/main/java/id
 class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         _binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
+
+        binding.verify.setOnClickListener {
+            initVerification()
+        }
     }
 
-    binding.verify.setOnClickListener {
-        initVerification()
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
-    fun initVerification() {
+    private fun initVerification() {
     }
+
 
     companion object {
         private const val TAG = "MainActivity"
@@ -220,7 +232,7 @@ Each time a verification is started we invalidate the UI, making sure all fields
 
 ```kotlin
     /** Called when the user taps the verify button */
-    fun initVerification(view: View) {
+    private fun initVerification() {
         Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
         // close virtual keyboard when sign in starts
         binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
@@ -268,7 +280,7 @@ Your `AndroidManifest.xml` will look as follows:
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SIMBasedAuthExample">
+        android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -298,14 +310,97 @@ android {
     }
 
     dependencies {
-        implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-        implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-        implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-        implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
+        implementation 'com.squareup.retrofit2:retrofit:<latest_version>'
+        implementation 'com.squareup.retrofit2:converter-gson:<latest_version>'
+        implementation 'com.squareup.okhttp3:okhttp:<latest_version>'
+        implementation 'com.squareup.okhttp3:logging-interceptor:<latest_version>'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:<latest_version>'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:<latest_version>'
     }
 }
+```
+
+### Optional step: Client side phone number pre-validation
+
+The minimum phone number pre-validation than can be achieved on the client side is to validate the phone number format with `libphonenumber`.
+Update `app/build.gradle` to include this library:
+
+```groovy
+implementation 'com.googlecode.libphonenumber:libphonenumber:<latest_version>'
+```
+
+And create a `util/PhoneNumberUtil.kt` utility that validates the phone number format +{country_code}{number} e.g. `+447900123456`
+
+```kotlin
+fun isPhoneNumberFormatValid(phoneNumber: String): Boolean {
+    val phoneNumberUtil = PhoneNumberUtil.getInstance()
+    return try {
+        phoneNumberUtil.isValidNumber(phoneNumberUtil.parse(
+                phoneNumber, Phonenumber.PhoneNumber.CountryCodeSource.UNSPECIFIED.name))
+    } catch (e: NumberParseException) {
+        false
+    }
+}
+```
+
+### Optional step: check if mobile data is enabled at runtime
+
+The SubscriberCheck validation requires the device to enable mobile data, and we can programmatically check if mobile data is disabled and launch Internet Connectivity settings dialog in that case.
+
+Firstly add a utility method `isMobileDataEnabled` to your `MainActivity.kt` to check if the mobile data is enabled:
+
+```kotlin
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun isMobileDataEnabled(): Boolean {
+        val tm = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+        return tm.isDataEnabled
+    }
+```
+
+Create `data/ConnectivitySettingsContract.kt` that uses Activity Result API to show the Internet Connectivity settings dialog.
+
+```kotlin
+class ConnectivitySettingsContract : ActivityResultContract<Int, Uri?>() {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun createIntent(context: Context, input: Int) = Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
+
+    override fun parseResult(resultCode: Int, result: Intent?): Uri? {
+        println("Result code $resultCode")
+
+        if (resultCode != Activity.RESULT_OK) {
+            return null
+        }
+
+        return result?.data
+    }
+}
+```
+
+Register an ActivityResultLauncher to your `MainActivity.kt` that takes the previously created `ConnectivitySettingsContract`:
+
+```kotlin
+    private val startSettingsForResult = registerForActivityResult(ConnectivitySettingsContract()) {
+        Log.i(TAG, "Internet Connectivity Setting dismissed")
+        initVerification()
+    }
+```
+
+If the mobile data is disabled we launch the previously created ActivityResultLauncher, as follows:
+
+```kotlin
+    private fun initVerification() {
+        Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
+        // close virtual keyboard when sign in starts
+        binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!isMobileDataEnabled()) {
+                startSettingsForResult.launch(CONNECTIVITY_SETTINGS_ACTION)
+                return
+            }
+        }
+        startVerification()
+    }
 ```
 
 ### 1. Creating a SubscriberCheck
@@ -371,6 +466,11 @@ Now we are ready to inform the user the verification process has started and cre
 
 ```kotlin
     private fun createSubscriberCheck() {
+        if (!isPhoneNumberFormatValid(binding.phoneNumber.text.toString())) {
+            binding.progressTv.text = getString(R.string.phone_check_step1_errror)
+            return
+        }
+
         CoroutineScope(Dispatchers.IO).launch {
             withContext(Dispatchers.Main) {
                 binding.progressTv.text = "Initiating Phone Verification ..."
@@ -398,7 +498,7 @@ Edit the `build.gradle` for your project at your project's root and add the foll
 Add the SDK dependency to `app/build.gradle` and sync the project.
 
 ```groovy
-implementation 'id.tru.sdk:tru-sdk-android:0.0.1'
+implementation 'id.tru.sdk:tru-sdk-android:<latest_version>'
 ```
 
 Initialize the `TruSDK` within `onCreate` in `MainActivity.kt`:
@@ -410,8 +510,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     TruSDK.initializeSdk(applicationContext)
 
     _binding = ActivityMainBinding.inflate(layoutInflater)
-    val view = binding.root
-    setContentView(view)
+    setContentView(binding.root)
 }
 ```
 
@@ -561,9 +660,7 @@ You can continue to play with and adjust the code you've developed here, or chec
 
 ## Where next?
 
-You can view a completed version of this sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. This completed version adds code to validate the phone number format with `libphonenumber`, and shows Internet Connectivity settings dialog prior to Login.
-
-**TODO: does it only show Internet Connectivity settings if mobile data is disabled?**
+You can view a completed version of this sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub.
 
 ### Programmatically reading the device Phone Number, if you wish to leave the phone number input as part of app's responsibility
 
@@ -572,7 +669,7 @@ One option is to use [Play Services auth-api-phone library](https://developers.g
 
 ## Troubleshooting
 
-Don't forget the SubscriberCheck validation requires the device to enable Mobile Data.
+Don't forget the SubscriberCheck validation requires the device to enable mobile data.
 Because we have attached a *HttpLoggingInterceptor* you can use adb logs to debug your SubscriberCheck:
 
 ```code
