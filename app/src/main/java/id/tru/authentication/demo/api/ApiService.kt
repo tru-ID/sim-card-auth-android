@@ -8,7 +8,7 @@ interface ApiService {
 
     @Headers("Content-Type: application/json")
     @POST("/check")
-    suspend fun getSubscriberCheck(@Body user: SubscriberCheckPost): Response<SubscriberCheck>
+    suspend fun createSubscriberCheck(@Body user: SubscriberCheckPost): Response<SubscriberCheck>
 
     @GET("/check_status")
     suspend fun getSubscriberCheckResult(@Query(value = "check_id") checkId: String): Response<SubscriberCheckResult>

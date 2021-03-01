@@ -4,20 +4,24 @@ import android.os.Build
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.util.Log
-import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.snackbar.Snackbar
 import id.tru.authentication.demo.api.RedirectManager
 import id.tru.authentication.demo.api.RetrofitBuilder
-import id.tru.authentication.demo.data.*
+import id.tru.authentication.demo.data.ConnectivitySettingsContract
+import id.tru.authentication.demo.data.SubscriberCheck
+import id.tru.authentication.demo.data.SubscriberCheckPost
+import id.tru.authentication.demo.data.SubscriberCheckResult
 import id.tru.authentication.demo.databinding.ActivityMainBinding
-import id.tru.authentication.demo.util.isPhoneNumberValid
+import id.tru.authentication.demo.util.isPhoneNumberFormatValid
 import id.tru.sdk.TruSDK
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,15 +37,14 @@ class MainActivity : AppCompatActivity() {
         initVerification()
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        startSettingsForResult.unregister()
         TruSDK.initializeSdk(applicationContext)
 
         _binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
 
         binding.verify.setOnClickListener {
             initVerification()
@@ -62,44 +65,42 @@ class MainActivity : AppCompatActivity() {
         binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (!isMobileDataConnectivityEnabled()) {
+            if (!isMobileDataEnabled()) {
                 startSettingsForResult.launch(CONNECTIVITY_SETTINGS_ACTION)
                 return
             }
         }
-        startVerification()
-    }
 
-    private fun startVerification() {
-        invalidateUI()
+        invalidateVerificationUI(false)
         createSubscriberCheck()
     }
 
-    private fun invalidateUI() {
-        binding.loadingLayout.visibility = View.VISIBLE
-        binding.progressCheckview.uncheck()
-        binding.progressTv.text = getString(R.string.phone_check_step1)
+    private fun invalidateVerificationUI(isEnabled: Boolean) {
+        if (isEnabled) {
+            binding.progressBar.hide()
+            binding.phoneNumber.setText("")
+        } else {
+            binding.progressBar.show()
+        }
+        binding.verify.isEnabled = isEnabled
+        binding.phoneNumber.isEnabled = isEnabled
     }
 
     // Step 1: Create a Subscriber Check
     private fun createSubscriberCheck() {
-        if (!isPhoneNumberValid(binding.phoneNumber.text.toString())) {
-            binding.progressTv.text = getString(R.string.phone_check_step1_errror)
+        if (!isPhoneNumberFormatValid(binding.phoneNumber.text.toString())) {
+            invalidateVerificationUI(true)
+            Snackbar.make(binding.container, "Phone number invalid", Snackbar.LENGTH_LONG).show()
             return
         }
-        binding.progressTv.text = getString(R.string.phone_check_step1)
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = RetrofitBuilder.apiClient.getSubscriberCheck(
+                val response = RetrofitBuilder.apiClient.createSubscriberCheck(
                         SubscriberCheckPost(binding.phoneNumber.text.toString()))
 
                 if (response.isSuccessful && response.body() != null) {
                     subscriberCheck = response.body() as SubscriberCheck
-
-                    withContext(Dispatchers.Main) {
-                        binding.progressTv.text = getString(R.string.phone_check_step2)
-                    }
 
                     // Step 2: Open the check_url
                     openCheckURL(subscriberCheck)
@@ -117,10 +118,6 @@ class MainActivity : AppCompatActivity() {
     private fun openCheckURL(check: SubscriberCheck) {
         CoroutineScope(Dispatchers.IO).launch {
             redirectManager.openCheckUrl(check.check_url)
-
-            withContext(Dispatchers.Main) {
-                binding.progressTv.text = getString(R.string.phone_check_step3)
-            }
 
             // Step 3: Get Phone Check Result
             getSubscriberCheckResult()
@@ -142,24 +139,24 @@ class MainActivity : AppCompatActivity() {
     private suspend fun updateUI(subscriberCheckResult: SubscriberCheckResult) {
         withContext(Dispatchers.Main) {
             if (subscriberCheckResult.match && subscriberCheckResult.no_sim_change) {
-                binding.progressCheckview.check()
-                binding.progressTv.text = getString(R.string.phone_check_complete)
+                Snackbar.make(binding.container, "Phone verification complete", Snackbar.LENGTH_LONG).show()
             } else {
-                binding.progressTv.text = getString(R.string.phone_check_error)
+                Snackbar.make(binding.container, "Phone verification failed", Snackbar.LENGTH_LONG).show()
             }
+
+            invalidateVerificationUI(true)
         }
     }
 
     private suspend fun updateUIonError(additionalInfo: String) {
         Log.e(TAG, additionalInfo)
         withContext(Dispatchers.Main) {
-            binding.phoneNumber.setText("")
-            binding.loadingLayout.visibility = View.INVISIBLE
+            invalidateVerificationUI(true)
         }
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private fun isMobileDataConnectivityEnabled(): Boolean {
+    private fun isMobileDataEnabled(): Boolean {
         val tm = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
         return tm.isDataEnabled
     }

@@ -6,9 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_top_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin">
+    android:paddingLeft="36dp"
+    android:paddingTop="220dp"
+    android:paddingRight="36dp">
+
 
     <TextView
         android:id="@+id/sign_in_header"
@@ -59,36 +60,18 @@
         app:layout_constraintBottom_toBottomOf="@+id/input_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/loading_layout"
+        app:layout_constraintTop_toTopOf="@+id/progress_bar"
         app:layout_constraintVertical_bias="0.698" />
 
-    <LinearLayout
-        android:id="@+id/loading_layout"
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress_bar"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="@dimen/layout_margin_l"
-        android:orientation="vertical"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
         android:visibility="invisible"
+        android:layout_marginTop="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/verify">
-
-    <cdflynn.android.library.checkview.CheckView
-        android:id="@+id/progress_checkview"
-        android:layout_width="@dimen/check_size"
-        android:layout_height="@dimen/check_size"
-        android:layout_gravity="center_horizontal"
-        app:checkView_strokeColor="@color/green"
-        app:checkView_strokeWidth="@dimen/check_stroke_width"/>
-
-        <TextView
-            android:id="@+id/progress_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"/>
-
-    </LinearLayout>
-
-
+        app:layout_constraintTop_toBottomOf="@+id/verify"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
