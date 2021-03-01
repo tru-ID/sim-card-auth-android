@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        startSettingsForResult.unregister()
         TruSDK.initializeSdk(applicationContext)
 
         _binding = ActivityMainBinding.inflate(layoutInflater)
