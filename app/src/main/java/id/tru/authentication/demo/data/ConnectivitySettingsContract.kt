@@ -22,8 +22,4 @@ class ConnectivitySettingsContract : ActivityResultContract<Int, Uri?>() {
 
         return result?.data
     }
-
-    companion object {
-        const val ACTION = "Settings.Panel.ACTION_INTERNET_CONNECTIVITY"
-    }
 }

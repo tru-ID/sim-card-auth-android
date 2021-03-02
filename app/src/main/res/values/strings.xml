@@ -3,20 +3,7 @@
     <string name="action_settings">Settings</string>
 
     <!-- Strings related to login -->
-    <string name="prompt_phone_number">tru.ID</string>
     <string name="action_sign_in">Verify my phone number</string>
     <string name="action_sign_in_header">To experience tru.ID verification, please enter your phone number</string>
-    <string name="welcome">Welcome !</string>
-    <string name="invalid_phone_number">Not a valid phone number</string>
-    <string name="login_failed">"Phone number check failed"</string>
     <string name="hint_text">Phone number</string>
-    <string name="helper_text">Phone number with country code</string>
-
-    <!-- Phone check steps -->
-    <string name="phone_check_step1">Validating Phone Number Input ...</string>
-    <string name="phone_check_step1_errror">Invalid phone number !</string>
-    <string name="phone_check_step2">Initiating Phone Verification ...</string>
-    <string name="phone_check_step3">Creating Mobile Data Session ...</string>
-    <string name="phone_check_complete">Phone verification failed</string>
-    <string name="phone_check_error">Phone verification complete</string>
 </resources>
