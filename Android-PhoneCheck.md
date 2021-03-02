@@ -68,13 +68,20 @@ With the development server setup we can move on to building the Android applica
 First, you have to create a new Android application using Android Studio. The app name is "SIMAuthentication". The package name is `id.tru.authentication.demo`.
 Click through the wizard, ensuring that "Empty Activity" is selected. Leave the "Activity Name" set to `MainActivity`, and leave the "Layout Name" set to `activity_main`.
 
-The [`tru-sdk-android`](https://github.com/tru-ID/tru-sdk-android) is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore pick minSdkVersion = 21 once creating the project.
+The [`tru-sdk-android`](https://github.com/tru-ID/tru-sdk-android) is available on Android devices with minimum Android SDK Version 21 (Lollipop), therefore select minSdkVersion = 21 once creating the project.
 
 ## Phone Number Authentication UI
 
 The first screen will be our Verification screen on which the user has to enter their phone number. After adding their phone number, the user will click on a "Verify my phone number" button to initiate the verification worflow.
 
-The user interface is straight forward: a `ConstraintLayout` with one `TextInputEditText` `phone_number` inside a `TextInputLayout` `input_layout` for phone number input and a Button to trigger the verification, followed by a `loading_layout` where the user is updated on the progress, as we will see later on.
+The user interface is straight forward: a `ConstraintLayout` with one `TextInputEditText` `phone_number` inside a `TextInputLayout` `input_layout` for phone number input and a Button to trigger the verification, followed by a `progress_bar` where the user is updated on the progress, as we will see later on.
+
+Make sure to add the dependencies for `ConstraintLayout` and Material Components: 
+
+```groovy
+implementation 'androidx.constraintlayout:constraintlayout:<latest_version>'
+implementation 'com.google.android.material:material:<latest_version>'
+```
 
 **TODO: make expandable in the tutorial**
 
@@ -90,6 +97,7 @@ The user interface is straight forward: a `ConstraintLayout` with one `TextInput
     android:paddingLeft="36dp"
     android:paddingTop="220dp"
     android:paddingRight="36dp">
+
 
     <TextView
         android:id="@+id/sign_in_header"
@@ -118,65 +126,50 @@ The user interface is straight forward: a `ConstraintLayout` with one `TextInput
             android:id="@+id/phone_number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"
             android:gravity="top|center"
             android:hint="Phone number"
             android:inputType="phone"
             android:imeOptions="actionDone"
-            android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/textView" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/login"
+        android:id="@+id/verify"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:background="#6200EE"
-        android:text="Verify my phone number"
-        android:onClick="initVerification"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:background="@color/colorPrimary"
+        android:text="@string/action_sign_in"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="@+id/input_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/loading_layout"
+        app:layout_constraintTop_toTopOf="@+id/progress_bar"
         app:layout_constraintVertical_bias="0.698" />
 
-    <LinearLayout
-        android:id="@+id/loading_layout"
+    <com.google.android.material.progressindicator.LinearProgressIndicator
+        android:id="@+id/progress_bar"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="48dp"
-        android:orientation="vertical"
-        android:visibility="visible"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="invisible"
+        android:layout_marginTop="100dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/login">
-
-        <TextView
-            android:id="@+id/progress_tv"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"/>
-
-    </LinearLayout>
+        app:layout_constraintTop_toBottomOf="@+id/verify"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 ```
-
-![Activity_main design view](images/activity_main_preview.png)
-
 
 The main screen will look like this:
 
 ![Design preview](images/main_layout.png)
 
-Add `viewBinding` to `app/build.gradle`:
-
+To enable view binding that allows you to more easily write code that interacts with views set the `viewBinding` build option to `true` in the `app/build.gradle` file:
 ```
 buildFeatures {
     viewBinding true
@@ -189,23 +182,27 @@ Bind the verification workflow to the verify button within `app/src/main/java/id
 class MainActivity : AppCompatActivity() {
 
     private var _binding: ActivityMainBinding? = null
-    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         _binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(binding.root)
+
+        binding.verify.setOnClickListener {
+            initVerification()
+        }
     }
 
-    binding.verify.setOnClickListener {
-        initVerification()
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
     }
 
-    fun initVerification() {
+    private fun initVerification() {
     }
+
 
     companion object {
         private const val TAG = "MainActivity"
@@ -216,21 +213,30 @@ class MainActivity : AppCompatActivity() {
 
 Each time a verification is started we invalidate the UI, making sure all fields are reset, in order to cater for subsequent verification attempts:
 
-**TODO: We should probably disable the button and text area here at the least and re-enable upon completion**
-
 ```kotlin
     /** Called when the user taps the verify button */
-    fun initVerification(view: View) {
+    private fun initVerification() {
         Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
         // close virtual keyboard when sign in starts
         binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
 
-        startVerification()
+        invalidateVerificationUI(false)
     }
 
-    private fun startVerification() {
+    private fun invalidateVerificationUI(isEnabled: Boolean) {
+        if (isEnabled) {
+            binding.progressBar.hide()
+            binding.phoneNumber.setText("")
+        } else {
+            binding.progressBar.show()
+        }
+        binding.verify.isEnabled = isEnabled
+        binding.phoneNumber.isEnabled = isEnabled
     }
 ```
+
+![Verification in progress](images/verification_in_progress.png)
+
 
 Now let's proceed to initiate a SubscriberCheck workflow, as described in the next section.
 
@@ -268,7 +274,7 @@ Your `AndroidManifest.xml` will look as follows:
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SIMBasedAuthExample">
+        android:theme="@style/Theme.MaterialComponents.Light.NoActionBar">
 
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -298,12 +304,12 @@ android {
     }
 
     dependencies {
-        implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-        implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-        implementation 'com.squareup.okhttp3:okhttp:4.9.0'
-        implementation 'com.squareup.okhttp3:logging-interceptor:4.9.0'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9'
-        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
+        implementation 'com.squareup.retrofit2:retrofit:<latest_version>'
+        implementation 'com.squareup.retrofit2:converter-gson:<latest_version>'
+        implementation 'com.squareup.okhttp3:okhttp:<latest_version>'
+        implementation 'com.squareup.okhttp3:logging-interceptor:<latest_version>'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:<latest_version>'
+        implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:<latest_version>'
     }
 }
 ```
@@ -372,9 +378,6 @@ Now we are ready to inform the user the verification process has started and cre
 ```kotlin
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
-            withContext(Dispatchers.Main) {
-                binding.progressTv.text = "Initiating Phone Verification ..."
-            }
 
             val subscriberCheck = RetrofitBuilder.apiClient.createSubscriberCheck(
                 SubscriberCheckPost(binding.phoneNumber.text.toString())
@@ -398,7 +401,7 @@ Edit the `build.gradle` for your project at your project's root and add the foll
 Add the SDK dependency to `app/build.gradle` and sync the project.
 
 ```groovy
-implementation 'id.tru.sdk:tru-sdk-android:0.0.1'
+implementation 'id.tru.sdk:tru-sdk-android:<latest_version>'
 ```
 
 Initialize the `TruSDK` within `onCreate` in `MainActivity.kt`:
@@ -410,8 +413,7 @@ override fun onCreate(savedInstanceState: Bundle?) {
     TruSDK.initializeSdk(applicationContext)
 
     _binding = ActivityMainBinding.inflate(layoutInflater)
-    val view = binding.root
-    setContentView(view)
+    setContentView(binding.root)
 }
 ```
 
@@ -434,11 +436,6 @@ Update the `createSubscriberCheck` function in `MainActivity.kt` to use the `Red
 
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
-
-            withContext(Dispatchers.Main) {
-                binding.progressTv.text = "Initiating Phone Verification ..."
-            }
-
             val response = RetrofitBuilder.apiClient.createSubscriberCheck(
                 SubscriberCheckPost(binding.phoneNumber.text.toString())
             )
@@ -448,9 +445,7 @@ Update the `createSubscriberCheck` function in `MainActivity.kt` to use the `Red
                 openCheckURL(subscriberCheck)
             }
             else {
-                withContext(Dispatchers.Main) {
-                    binding.progressTv.text = "Error Occurred: ${response.message()}"
-                }
+                updateUIonError("Error Occurred: ${response.message()}")
             }
         }
     }
@@ -458,6 +453,13 @@ Update the `createSubscriberCheck` function in `MainActivity.kt` to use the `Red
     private fun openCheckURL(check: SubscriberCheck) {
         CoroutineScope(Dispatchers.IO).launch {
             redirectManager.openCheckUrl(check.check_url)
+        }
+    }
+
+    private suspend fun updateUIonError(additionalInfo: String) {
+        Log.e(TAG, additionalInfo)
+        withContext(Dispatchers.Main) {
+            invalidateVerificationUI(true)
         }
     }
 ```
@@ -509,12 +511,8 @@ Now it's time to find out if the phone number was verified successfully. Create 
             val response = RetrofitBuilder.apiClient.getSubscriberCheckResult(check.check_id)
             if(response.isSuccessful && response.body() != null) {
                 val subscriberCheckResult = response.body() as SubscriberCheckResult
+                
                 updateUI(subscriberCheckResult)
-            }
-            else {
-                withContext(Dispatchers.Main) {
-                    binding.progressTv.text = "Error Occurred: ${response.message()}"
-                }
             }
         }
     }
@@ -530,18 +528,20 @@ There you go, based on the `subscriberCheckResult` you may notify the user that 
     private suspend fun updateUI(subscriberCheckResult: SubscriberCheckResult) {
         withContext(Dispatchers.Main) {
             if (subscriberCheckResult.match && subscriberCheckResult.no_sim_change) {
-                binding.progressTv.text = "Phone verification complete"
+                Snackbar.make(binding.container, "Phone verification complete", Snackbar.LENGTH_LONG).show()
             } else {
-                binding.progressTv.text = "Phone verification failed"
+                Snackbar.make(binding.container, "Phone verification failed", Snackbar.LENGTH_LONG).show()
             }
-        } 
+
+            invalidateVerificationUI(true)
+        }
     }
 ```
     
 The value of `no_sim_change` indicates if the SIM card has not been changed in the last 7 days.
 For example, in the case of `match = true` but `no_sim_change = false` the phone number has been verified but the fact the SIM card has changed recently means that it's good practice to perform additional user checks before allowing them to register or login.
 
-![Verification complete](images/verification_done.png)
+![Verification complete](images/verification_complete.png)
 
 In an application that contains more than a login or signup activity you would now show either a screen to capture more user information or the successfully registered/logged-in screen.
 
@@ -553,17 +553,122 @@ Enter the phone number for the mobile device in the UI in the format +{country_c
 
 Touch the "Verify my phone number" button.
 
-**TODO: add video of app in action**
+![App in action](images/phone_verification.gif)
 
 Congratulations! You've finished the **SIM Card Based Mobile Authentication for Android** Tutorial.
 
-You can continue to play with and adjust the code you've developed here, or check out the **Where next?** section below.
-
 ## Where next?
 
-You can view a completed version of this sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub. This completed version adds code to validate the phone number format with `libphonenumber`, and shows Internet Connectivity settings dialog prior to Login.
+You can view a completed version of this sample app in the [sim-card-auth-android repo](https://github.com/tru-ID/sim-card-auth-android) on GitHub.
 
-**TODO: does it only show Internet Connectivity settings if mobile data is disabled?**
+### Optional step: Client side phone number pre-validation
+
+The minimum phone number pre-validation than can be achieved on the client side is to validate the phone number format with `libphonenumber`.
+Update `app/build.gradle` to include this library:
+
+```groovy
+implementation 'com.googlecode.libphonenumber:libphonenumber:<latest_version>'
+```
+
+And create a `util/PhoneNumberUtil.kt` utility that validates the phone number format +{country_code}{number} e.g. `+447900123456`
+
+```kotlin
+fun isPhoneNumberFormatValid(phoneNumber: String): Boolean {
+    val phoneNumberUtil = PhoneNumberUtil.getInstance()
+    return try {
+        phoneNumberUtil.isValidNumber(phoneNumberUtil.parse(
+                phoneNumber, Phonenumber.PhoneNumber.CountryCodeSource.UNSPECIFIED.name))
+    } catch (e: NumberParseException) {
+        false
+    }
+}
+```
+
+Now invoke the phone number pre-validation on `createSubscriberCheck`:
+
+```kotlin
+private fun createSubscriberCheck() {
+    if (!isPhoneNumberFormatValid(binding.phoneNumber.text.toString())) {
+        invalidateVerificationUI(true)
+        Snackbar.make(binding.container, "Phone number invalid", Snackbar.LENGTH_LONG).show()
+        return
+    }
+ ```
+
+### Optional step: check if mobile data is enabled at runtime
+
+The SubscriberCheck validation requires the device to enable mobile data, and we can programmatically check if mobile data is disabled and launch Internet Connectivity settings dialog in that case.
+
+Firstly add a utility method `isMobileDataEnabled` to your `MainActivity.kt` to check if the mobile data is enabled:
+
+```kotlin
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun isMobileDataEnabled(): Boolean {
+        val tm = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+        return tm.isDataEnabled
+    }
+```
+
+The Activity Result APIs provide components for registering for a result, launching the result, and handling the result once it is dispatched by the system.
+
+To get started, add the dependencies:
+```groovy
+implementation 'androidx.activity:activity-ktx:<latest_version>'
+implementation 'androidx.fragment:fragment-ktx:<latest_version>'
+```
+
+The next step is to create a custom result contract `data/ConnectivitySettingsContract.kt`, this class would extend ActivityResultContract<I,O> which requires defining input and output classes.
+
+```kotlin
+class ConnectivitySettingsContract : ActivityResultContract<Int, Uri?>() {
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun createIntent(context: Context, input: Int) = Intent(Settings.Panel.ACTION_INTERNET_CONNECTIVITY)
+
+    override fun parseResult(resultCode: Int, result: Intent?): Uri? {
+        println("Result code $resultCode")
+
+        if (resultCode != Activity.RESULT_OK) {
+            return null
+        }
+
+        return result?.data
+    }
+}
+```
+
+Next, we register a callback for an activity result, we do that by defining registerForActivityResult() which takes the `ConnectivitySettingsContract` and ActivityResultCallback and returns an ActivityResultLauncher which is used to launch the other activity:
+
+```kotlin
+    private val startSettingsForResult = registerForActivityResult(ConnectivitySettingsContract()) {
+        Log.i(TAG, "Internet Connectivity Setting dismissed")
+        initVerification()
+    }
+```
+
+If the mobile data is disabled we launch the previously created ActivityResultLauncher, as follows:
+
+```kotlin
+    private fun initVerification() {
+        Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
+        // close virtual keyboard when sign in starts
+        binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (!isMobileDataEnabled()) {
+                startSettingsForResult.launch(CONNECTIVITY_SETTINGS_ACTION)
+                return
+            }
+        }
+        startVerification()
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
+        const val CONNECTIVITY_SETTINGS_ACTION = 1
+    }
+```
+
+![Connectivity settings dialog](images/connectivity_settings.png)
 
 ### Programmatically reading the device Phone Number, if you wish to leave the phone number input as part of app's responsibility
 
@@ -572,7 +677,7 @@ One option is to use [Play Services auth-api-phone library](https://developers.g
 
 ## Troubleshooting
 
-Don't forget the SubscriberCheck validation requires the device to enable Mobile Data.
+Don't forget the SubscriberCheck validation requires the device to enable mobile data.
 Because we have attached a *HttpLoggingInterceptor* you can use adb logs to debug your SubscriberCheck:
 
 ```code
