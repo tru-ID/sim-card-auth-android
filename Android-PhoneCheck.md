@@ -728,7 +728,7 @@ D/LoginActivity: redirect done [7961ms]
 I/okhttp.OkHttpClient: --> GET https://mylocalserver.example/subscriber-check/NEW_CHECK_ID
 I/okhttp.OkHttpClient: --> END GET
 I/okhttp.OkHttpClient: <-- 200 https://mylocalserver.example/subscriber-check/NEW_CHECK_ID (749ms)
-I/okhttp.OkHttpClient: {"match":true,"check_id":"NEW_CHECK_ID"}
+I/okhttp.OkHttpClient: {"match":true,"check_id":"NEW_CHECK_ID","no_sim_change":true}
 I/okhttp.OkHttpClient: <-- END HTTP (64-byte body)
 ```
 
