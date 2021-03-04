@@ -222,8 +222,6 @@ class MainActivity : AppCompatActivity() {
     private fun initVerification() {
     }
 
-
-
     companion object {
         private const val TAG = "MainActivity"
     }
