@@ -182,7 +182,7 @@ android {
 }
 ```
 
-Bind the verification workflow to the verify button within `app/src/main/java/id/tru/authentication/demo/MainActivity.kt` and enable the button once a phone number is provided: 
+Bind the verification workflow to the verify button within `app/src/main/java/id/tru/authentication/demo/MainActivity.kt`: 
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -196,8 +196,6 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        toggleVerifyButton()
-
         binding.verify.setOnClickListener {
             initVerification()
         }
@@ -206,22 +204,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-    }
-
-    // ensure phone number input is provided before verify button is enabled
-    private fun toggleVerifyButton() {
-        binding.phoneNumber.addTextChangedListener(object : TextWatcher {
-
-            override fun afterTextChanged(s: Editable) {}
-
-            override fun beforeTextChanged(s: CharSequence, start: Int,
-                                           count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence, start: Int,
-                                       before: Int, count: Int) {
-                binding.verify.isEnabled = (s.length == 13)
-            }
-        })
     }
 
     private fun initVerification() {
@@ -455,8 +437,6 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
     _binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
-
-    toggleVerifyButton()
     
     binding.verify.setOnClickListener {
         initVerification()
