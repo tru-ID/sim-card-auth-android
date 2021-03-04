@@ -576,7 +576,7 @@ Enter the phone number for the mobile device in the UI in the format +{country_c
 
 Touch the "Verify my phone number" button.
 
-![App in action](images/verification_in_action.mp4)
+![App in action](https://user-images.githubusercontent.com/8059288/110026424-847ed300-7d28-11eb-9060-e6dfd91ed54d.mp4)
 
 Congratulations! You've finished the **SIM Card Based Mobile Authentication for Android** Tutorial.
 
