@@ -47,7 +47,7 @@ $ git clone git@github.com:tru-ID/sim-card-auth-android.git
 
 Open the project with your Android Capable IDE.
 
-Create a file named `tru-id.properties` in the root directory of your project and update the configuration value to be the local tunne URL of the development server:
+Create a file `app/tru-id.properties` in your project and add configuration to identify the local tunnel URL of the development server:
 
 ```
 EXAMPLE_SERVER_BASE_URL="https://example.com"
