@@ -140,11 +140,12 @@ implementation 'com.google.android.material:material:<latest_version>'
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginTop="20dp"
         android:background="@color/colorPrimary"
-        android:text="@string/action_sign_in"
+        android:text="Verify my phone number"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
+        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="@+id/input_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -176,7 +177,7 @@ buildFeatures {
 }
 ```
 
-Bind the verification workflow to the verify button within `app/src/main/java/id/tru/authentication/demo/MainActivity.kt`:
+Bind the verification workflow to the verify button within `app/src/main/java/id/tru/authentication/demo/MainActivity.kt` and enable the button once a phone number is provided: 
 
 ```kotlin
 class MainActivity : AppCompatActivity() {
@@ -190,6 +191,8 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        toggleVerifyButton()
+
         binding.verify.setOnClickListener {
             initVerification()
         }
@@ -200,8 +203,25 @@ class MainActivity : AppCompatActivity() {
         _binding = null
     }
 
+    // ensure phone number input is provided before verify button is enabled
+    private fun toggleVerifyButton() {
+        binding.phoneNumber.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+                binding.verify.isEnabled = (s.length == 13)
+            }
+        })
+    }
+
     private fun initVerification() {
     }
+
 
 
     companion object {
@@ -433,6 +453,8 @@ override fun onCreate(savedInstanceState: Bundle?) {
     _binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
 
+    toggleVerifyButton()
+    
     binding.verify.setOnClickListener {
         initVerification()
     }
