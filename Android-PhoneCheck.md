@@ -89,7 +89,6 @@ The user interface is straight forward: a `ConstraintLayout` with one `TextInput
     android:paddingTop="220dp"
     android:paddingRight="36dp">
 
-
     <TextView
         android:id="@+id/sign_in_header"
         android:layout_width="match_parent"
@@ -174,11 +173,9 @@ To enable view binding that allows you to more easily write code that interacts 
 
 ```
 android {
-
     buildFeatures {
         viewBinding true
     }
-
 }
 ```
 
@@ -579,7 +576,7 @@ Enter the phone number for the mobile device in the UI in the format +{country_c
 
 Touch the "Verify my phone number" button.
 
-![App in action](images/phone_verification.gif)
+![App in action](images/verification_in_action.mp4)
 
 Congratulations! You've finished the **SIM Card Based Mobile Authentication for Android** Tutorial.
 
