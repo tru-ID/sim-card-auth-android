@@ -76,7 +76,7 @@ The first screen will be our Verification screen on which the user has to enter 
 
 The user interface is straight forward: a `ConstraintLayout` with one `TextInputEditText` `phone_number` inside a `TextInputLayout` `input_layout` for phone number input and a Button to trigger the verification, followed by a `progress_bar` where the user is updated on the progress, as we will see later on.
 
-Make sure to add the dependencies for `ConstraintLayout` and Material Components: 
+Make sure to update the dependencies for `ConstraintLayout` and Material Components with the latest available versions:
 
 ```groovy
 implementation 'androidx.constraintlayout:constraintlayout:<latest_version>'
@@ -376,6 +376,16 @@ Note that the `BuildConfig.SERVER_BASE_URL` will be set with the value of `EXAMP
 Now we are ready to inform the user the verification process has started and create the SubscriberCheck using the provided phone number within `MainActivity.kt`:
 
 ```kotlin
+    /** Called when the user taps the verify button */
+    private fun initVerification() {
+        Log.d(TAG, "phoneNumber " + binding.phoneNumber.text)
+        // close virtual keyboard when sign in starts
+        binding.phoneNumber.onEditorAction(EditorInfo.IME_ACTION_DONE)
+
+        invalidateVerificationUI(false)
+        createSubscriberCheck()
+    }
+    
     private fun createSubscriberCheck() {
         CoroutineScope(Dispatchers.IO).launch {
 
@@ -392,10 +402,18 @@ At this point you're going to add the `tru-sdk-android` SDK to your project to e
 
 Edit the `build.gradle` for your project at your project's root and add the following code snippet to the `allprojects/repositories` section:
 
+
 ```groovy
-    maven {
-        url "https://gitlab.com/api/v4/projects/22035475/packages/maven"
+allprojects {
+    repositories {
+        google()
+        jcenter()
+        maven {
+            url "https://gitlab.com/api/v4/projects/22035475/packages/maven"
+        }
+        maven { url 'https://jitpack.io' }
     }
+}
  ```
 
 Add the SDK dependency to `app/build.gradle` and sync the project.
@@ -414,6 +432,10 @@ override fun onCreate(savedInstanceState: Bundle?) {
 
     _binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
+
+    binding.verify.setOnClickListener {
+        initVerification()
+    }
 }
 ```
 
