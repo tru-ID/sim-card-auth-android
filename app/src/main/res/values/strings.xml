@@ -1,9 +1,4 @@
 <resources>
     <string name="app_name">SIMAuthentication</string>
     <string name="action_settings">Settings</string>
-
-    <!-- Strings related to login -->
-    <string name="action_sign_in">Verify my phone number</string>
-    <string name="action_sign_in_header">To experience tru.ID verification, please enter your phone number</string>
-    <string name="hint_text">Phone number</string>
 </resources>

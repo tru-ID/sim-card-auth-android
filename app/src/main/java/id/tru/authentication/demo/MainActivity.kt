@@ -3,6 +3,8 @@ package id.tru.authentication.demo
 import android.os.Build
 import android.os.Bundle
 import android.telephony.TelephonyManager
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.inputmethod.EditorInfo
 import androidx.annotation.RequiresApi
@@ -45,9 +47,27 @@ class MainActivity : AppCompatActivity() {
         _binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        toggleVerifyButton()
+
         binding.verify.setOnClickListener {
             initVerification()
         }
+    }
+
+    // ensure phone number input is provided before verify button is enabled
+    private fun toggleVerifyButton() {
+        binding.phoneNumber.addTextChangedListener(object : TextWatcher {
+
+            override fun afterTextChanged(s: Editable) {}
+
+            override fun beforeTextChanged(s: CharSequence, start: Int,
+                                           count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence, start: Int,
+                                       before: Int, count: Int) {
+                binding.verify.isEnabled = (s.length == 13)
+            }
+        })
     }
 
     override fun onDestroy() {
@@ -131,6 +151,9 @@ class MainActivity : AppCompatActivity() {
                 val subscriberCheckResult = response.body() as SubscriberCheckResult
 
                 updateUI(subscriberCheckResult)
+            } else {
+                // Show API error.
+                updateUIonError("Error Occurred: ${response.message()}")
             }
         }
     }
@@ -151,6 +174,7 @@ class MainActivity : AppCompatActivity() {
         Log.e(TAG, additionalInfo)
         withContext(Dispatchers.Main) {
             invalidateVerificationUI(true)
+            Snackbar.make(binding.container, "Could not verify your number", Snackbar.LENGTH_LONG).show()
         }
     }
 
