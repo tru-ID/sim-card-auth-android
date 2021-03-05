@@ -7,9 +7,9 @@ import retrofit2.http.*
 interface ApiService {
 
     @Headers("Content-Type: application/json")
-    @POST("/check")
+    @POST("/subscriber-check")
     suspend fun createSubscriberCheck(@Body user: SubscriberCheckPost): Response<SubscriberCheck>
 
-    @GET("/check_status")
-    suspend fun getSubscriberCheckResult(@Query(value = "check_id") checkId: String): Response<SubscriberCheckResult>
+    @GET("/subscriber-check/{check_id}")
+    suspend fun getSubscriberCheckResult(@Path(value = "check_id") checkId: String): Response<SubscriberCheckResult>
 }

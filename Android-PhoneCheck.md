@@ -89,7 +89,6 @@ The user interface is straight forward: a `ConstraintLayout` with one `TextInput
     android:paddingTop="220dp"
     android:paddingRight="36dp">
 
-
     <TextView
         android:id="@+id/sign_in_header"
         android:layout_width="match_parent"
@@ -174,11 +173,9 @@ To enable view binding that allows you to more easily write code that interacts 
 
 ```
 android {
-
     buildFeatures {
         viewBinding true
     }
-
 }
 ```
 
@@ -579,7 +576,7 @@ Enter the phone number for the mobile device in the UI in the format +{country_c
 
 Touch the "Verify my phone number" button.
 
-![App in action](images/phone_verification.gif)
+![App in action](https://user-images.githubusercontent.com/8059288/110026424-847ed300-7d28-11eb-9060-e6dfd91ed54d.mp4)
 
 Congratulations! You've finished the **SIM Card Based Mobile Authentication for Android** Tutorial.
 
@@ -731,7 +728,7 @@ D/LoginActivity: redirect done [7961ms]
 I/okhttp.OkHttpClient: --> GET https://mylocalserver.example/subscriber-check/NEW_CHECK_ID
 I/okhttp.OkHttpClient: --> END GET
 I/okhttp.OkHttpClient: <-- 200 https://mylocalserver.example/subscriber-check/NEW_CHECK_ID (749ms)
-I/okhttp.OkHttpClient: {"match":true,"check_id":"NEW_CHECK_ID"}
+I/okhttp.OkHttpClient: {"match":true,"check_id":"NEW_CHECK_ID","no_sim_change":true}
 I/okhttp.OkHttpClient: <-- END HTTP (64-byte body)
 ```
 
