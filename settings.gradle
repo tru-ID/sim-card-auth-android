@@ -1,2 +1,3 @@
+include ':trusdk'
 include ':app'
 rootProject.name = "SIMAuthentication"

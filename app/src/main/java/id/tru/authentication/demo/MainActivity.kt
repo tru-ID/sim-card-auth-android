@@ -49,8 +49,20 @@ class MainActivity : AppCompatActivity() {
 
         toggleVerifyButton()
 
+        getIPAddress()
+
         binding.verify.setOnClickListener {
             initVerification()
+        }
+    }
+
+    private fun getIPAddress() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val ipAddr = redirectManager.getJsonPropertyValue(BuildConfig.SERVER_BASE_URL + "/my-ip")
+            Log.d(TAG, "IP $ipAddr")
+            withContext(Dispatchers.Main) {
+                Snackbar.make(binding.container, "Your IP: $ipAddr", Snackbar.LENGTH_LONG).show()
+            }
         }
     }
 
