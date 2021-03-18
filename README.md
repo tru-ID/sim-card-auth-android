@@ -5,7 +5,7 @@ How to Add SIM Card Based Mobile Authentication to your Android App with [tru.ID
 [![License][license-image]][license-url]
 
 
-## Before you being
+## Before you begin
 
 You will need:
 
